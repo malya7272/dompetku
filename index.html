@@ -755,7 +755,7 @@ function plist(k){const g=k==='g',L=S[g?'gl':'db']||[];return pg(g?'Target':'Hut
 function pa(k){const n=$('#pn').value.trim(),t=+$('#pt').value.replace(/\D/g,'');if(!n||!t)return;const f=k==='g'?'gl':'db';S[f]=[...(S[f]||[]),{id:Date.now(),n,t,p:0}];save();render()}
 function pp(k,i){const f=k==='g'?'gl':'db',v=+$('#pp'+i).value.replace(/\D/g,'');if(!v)return;const x=S[f].find(y=>y.id===i);x.p+=v;if(k==='h')S.tx.push({id:Date.now(),t:'out',a:v,c:'Tagihan',n:'Bayar '+x.n,d:today(),w:wl()[0]});save();render()}
 function px(k,i){const f=k==='g'?'gl':'db';S[f]=S[f].filter(y=>y.id!==i);save();render()}
-let fa=null,fd=null,fu=null,fs='off',unsub=null,ctm=0,fbInitPromise=null,cloudState='off';
+let fa=null,fd=null,fu=null,fs='off',unsub=null,ctm=0,fbInitPromise=null,cloudState='off',authReady=false;
 const ld=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
 const plo=()=>{const o={...S};delete o.fb;delete o.th;delete o.hide;delete o.chat;delete o.gs;delete o.pf;delete o.ses;return JSON.stringify(o)};
 const mg=(a,b)=>{const u=(x,y)=>{const m=new Map();[...(x||[]),...(y||[])].forEach(i=>m.set(i.id,i));return[...m.values()]};return{...a,...b,tx:u(a.tx,b.tx),gl:u(a.gl,b.gl),db:u(a.db,b.db),wl:[...new Set([...(a.wl||[]),...(b.wl||[])])],bud:{...a.bud,...b.bud}}};
@@ -772,15 +772,17 @@ function cloud(n){
  },n?0:800)
 }
 async function fbInit(){
- if(!S.fb||fa)return;
+ if(!S.fb||authReady)return;
  if(fbInitPromise)return fbInitPromise;
  fbInitPromise=(async()=>{const b='https://www.gstatic.com/firebasejs/10.12.2/';
   if(!window.firebase){await ld(b+'firebase-app-compat.js');await ld(b+'firebase-auth-compat.js');await ld(b+'firebase-firestore-compat.js')}
   if(!firebase.apps.length)firebase.initializeApp(S.fb);
   fa=firebase.auth();fd=firebase.firestore();
   fa.onAuthStateChanged(u=>{fu=u;fs=u?'on':'off';cloudState=u?'syncing':'off';if(u){onAuth(u);if(!isDemo)sub()}else{if(unsub)unsub();unsub=null}if(tab==='set'||tab==='prf')render()});
-  await fa.getRedirectResult().catch(e=>{gAuthError(e);if(tab==='set')render();else if($('#gate').classList.contains('on'))gateRender()});
- })().catch(e=>{fs='err';if(tab==='set')render()}).finally(()=>{fbInitPromise=null});
+  await fa.getRedirectResult();
+  authReady=true;gBusy=false;
+  if($('#gate').classList.contains('on'))gateRender();else if(tab==='prf'||tab==='set')render();
+ })().catch(e=>{fs='err';gAuthError(e);if(tab==='set'||tab==='prf')render();if($('#gate').classList.contains('on'))gateRender();throw e}).finally(()=>{fbInitPromise=null});
  return fbInitPromise;
 }
 function sub(){
@@ -795,8 +797,11 @@ function sub(){
   if((o.ts||0)>(S.ts||0)){S={...o,...k,sy:fu.uid};save(1);render()}else if((S.ts||0)>(o.ts||0))cloud(1)
  },()=>{fs='err';cloudState='err';if(tab==='set'||tab==='prf')render()})
 }
-function fbSave(){const t=$('#fbc').value,o={};for(const m of t.matchAll(/(\w+)\s*:\s*["']([^"']+)["']/g))o[m[1]]=m[2];if(!o.apiKey||!o.projectId){$('#fbc').value='';$('#fbc').placeholder='Konfigurasi tidak valid. Tempel seluruh blok firebaseConfig.';return}S.fb=o;save();fbInit();render()}
-async function fbIn(){try{if(!fa)await fbInit();if(!fa)throw new Error('Firebase Auth gagal dimuat');await fa.signInWithRedirect(new firebase.auth.GoogleAuthProvider())}catch(e){gAuthError(e);render()}}
+function fbSave(){const t=$('#fbc').value,o={};for(const m of t.matchAll(/(\w+)\s*:\s*["']([^"']+)["']/g))o[m[1]]=m[2];if(!o.apiKey||!o.projectId){$('#fbc').value='';$('#fbc').placeholder='Konfigurasi tidak valid. Tempel seluruh blok firebaseConfig.';return}S.fb=o;save();fbInit().catch(()=>{});render()}
+function fbIn(){
+ if(!authReady||!fa){gmsg='Menyiapkan login Google…';render();fbInit().catch(()=>{});return}
+ fa.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{gAuthError(e);render()})
+}
 function fbOut(){if(fa)fa.signOut()}
 function fbDel(){if(fa)fa.signOut();S.fb=null;S.sy=null;fs='off';save(1);render()}
 function cl(){
@@ -1030,7 +1035,8 @@ function gateRender(){
  ['rn','re','rd','ri'].forEach(i=>{const e=$('#'+i);if(e&&typeof e.value==='string'&&e.value!=='')gv[i]=e.value});
  const h=new Date().getHours(),gr=h<11?'pagi':h<15?'siang':h<18?'sore':'malam',p=S.pf,cfg=!!(S.fb||FB_DEFAULT);
  const msg=gmsg?`<div class='gnote' style='color:var(--tx)'>${esc(gmsg)}</div>`:'';
- const gb=`<button class='btn gbtn' onclick='gLogin()' ${gBusy?'disabled aria-busy="true"':''}>${gBusy?`<span class='gspin' aria-hidden='true'></span>`:`<span class='gg'>G</span>`}${gBusy?'Menghubungkan ke Google…':gtab==='up'?'Daftar dengan Google':'Masuk dengan Google'}</button>`;
+ const gwait=gBusy||(!authReady&&fs!=='err');
+ const gb=`<button class='btn gbtn' onclick='gLogin()' ${gwait?'disabled aria-busy="true"':''}>${gwait?`<span class='gspin' aria-hidden='true'></span>`:`<span class='gg'>G</span>`}${gBusy?'Membuka Google…':!authReady&&fs!=='err'?'Menyiapkan login…':gtab==='up'?'Daftar dengan Google':'Masuk dengan Google'}</button>`;
  const cfgBox=cfg?'':`<div class='gnote'>Login Google belum diaktifkan oleh pemilik aplikasi.</div>`;
  const body=gtab==='in'?`${p&&!S.ses?`<button class='btn' onclick='${p.mode==='google'?'gLogin()':'gEnter()'}'>Lanjut sebagai ${esc(p.name)}</button>`:''}${gb}${msg}${cfgBox}`
  :`<input id='rn' class='fld' placeholder='Nama' value="${esc(gv.rn||'')}"><input id='re' class='fld' type='email' placeholder='Email (opsional)' value="${esc(gv.re||'')}"><input id='rd' class='fld' inputmode='numeric' placeholder='Tanggal gajian (25)' value="${esc(gv.rd||'')}"><input id='ri' class='fld' inputmode='numeric' placeholder='Pemasukan bulanan (opsional)' oninput='fi(this)' value="${esc(gv.ri||'')}"><button class='btn' onclick='gReg()'>Buat akun</button>${msg}<div class='gnote' style='text-align:center'>atau</div>${gb}`;
@@ -1047,14 +1053,22 @@ function gAuthError(e){
   :c==='auth/operation-not-allowed'?'Provider Google belum diaktifkan di Firebase Authentication.'
   :c==='auth/network-request-failed'?'Koneksi Firebase gagal. Periksa internet lalu coba lagi.'
   :c==='auth/invalid-api-key'?'Firebase API key tidak valid.'
+  :c==='auth/popup-blocked'?'Popup login diblokir browser. Izinkan popup untuk situs ini lalu coba lagi.'
+  :c==='auth/popup-closed-by-user'?'Jendela Google ditutup sebelum login selesai.'
+  :c==='auth/cancelled-popup-request'?'Permintaan login sebelumnya dibatalkan. Coba lagi.'
   :`Gagal masuk dengan Google${c?' ('+c+')':''}. Coba lagi atau periksa pengaturan Firebase.`;
 }
-async function gLogin(){
+function gLogin(){
  if(!(S.fb||FB_DEFAULT)){gmsg='Login Google belum aktif.';if(tab==='prf')render();else gateRender();return}
  if(gBusy)return;
- if(!S.fb)S.fb=FB_DEFAULT;gBusy=true;gmsg='Mengalihkan ke Google…';if(tab==='prf')render();else gateRender();
- try{if(!fa)await fbInit();if(!fa)throw new Error('Firebase Auth gagal dimuat');await fa.signInWithRedirect(new firebase.auth.GoogleAuthProvider())}
- catch(e){gAuthError(e);if(tab==='prf')render();else gateRender()}}
+ if(!authReady||!fa){gBusy=true;gmsg='Menyiapkan login Google…';if(tab==='prf')render();else gateRender();fbInit().catch(()=>{});return}
+ gBusy=true;gmsg='Membuka Google…';
+ let attempt;
+ try{attempt=fa.signInWithPopup(new firebase.auth.GoogleAuthProvider())}
+ catch(e){gAuthError(e);if(tab==='prf')render();else gateRender();return}
+ if(tab==='prf')render();else gateRender();
+ attempt.then(()=>{gBusy=false;gmsg=''}).catch(e=>{gAuthError(e);if(tab==='prf')render();else gateRender()})
+}
 function gFb(){fbSave();setTimeout(gateRender,80)}
 function onAuth(u){
  gBusy=false;
@@ -1086,7 +1100,7 @@ function prf(){
  const row=(a,b)=>`<div class='li row sp'><span class='sub'>${a}</span><span style='text-align:right'>${b}</span></div>`,cloudLabel=cloudState==='syncing'?'menyinkronkan…':cloudState==='synced'?'tersinkron':cloudState==='err'?'gagal sinkron':'belum masuk';
  return pg('Profil','',`<div class='card' style='text-align:center'><div class='avb'>${ini}${p.photo?`<img src="${esc(p.photo)}" alt="" referrerpolicy="no-referrer">`:''}</div><div style='font-size:20px;font-weight:600;margin-top:10px'>${esc(p.name)}</div><div class='sub'>${esc(p.email||'Belum ada email')}</div><span class='st ${lbl[0]}' style='margin-top:8px'>${lbl[1]}</span></div>
  ${dm?`<div class='card'><div class='sub'>Data contoh. Perubahan tidak disimpan.</div><button class='btn' onclick='gOut()'>Keluar dari demo</button></div>`:`<div class='card'><b>Nama panggilan</b><div class='row' style='margin-top:8px'><input id='pnm' class='fld' style='margin:0' value="${esc(p.name)}"><button class='pill' onclick='pSave()'>Simpan</button></div></div>
- ${g?'':`<div class='card'><b>Hubungkan akun Google</b><button class='btn gbtn' onclick='gLink()' ${gBusy?'disabled aria-busy="true"':''}>${gBusy?`<span class='gspin' aria-hidden='true'></span>`:`<span class='gg'>G</span>`}${gBusy?'Menghubungkan ke Google…':'Hubungkan Google'}</button>${gmsg?`<div class='gnote' style='color:var(--tx)'>${esc(gmsg)}</div>`:''}</div>`}
+ ${g?'':`<div class='card'><b>Hubungkan akun Google</b><button class='btn gbtn' onclick='gLink()' ${gBusy||(!authReady&&fs!=='err')?'disabled aria-busy="true"':''}>${gBusy||(!authReady&&fs!=='err')?`<span class='gspin' aria-hidden='true'></span>`:`<span class='gg'>G</span>`}${gBusy?'Membuka Google…':!authReady&&fs!=='err'?'Menyiapkan login…':'Hubungkan Google'}</button>${gmsg?`<div class='gnote' style='color:var(--tx)'>${esc(gmsg)}</div>`:''}</div>`}
  <div class='card'><b>Penyimpanan data</b>${row('Di perangkat ini',S.tx.length+' transaksi')}${row('Akun Google (cloud)',fu?`<span class='${cloudState==='err'?'out':'in'}'>${cloudLabel}</span>`:S.fb?'belum masuk':'belum diaktifkan')}${row('Spreadsheet',S.gs&&S.gs.last?new Date(S.gs.last).toLocaleDateString('id-ID'):'belum backup')}<button class='btn' style='margin-top:10px' data-k='set' onclick='go(this.dataset.k)'>Pengaturan & backup</button></div>
  <div class='card'><button class='btn' style='background:var(--fill);color:var(--ct)' onclick='gOut()'>Keluar</button><button class='btn' style='background:var(--fill);color:var(--red)' onclick='gDel(this)'>Hapus data</button>${pwaE?`<button class='btn' onclick='pwaInstall()'>Pasang di layar utama</button>`:''}<div class='gnote'>Keluar tidak menghapus data.</div></div>`}`)}
 const HS=[],bb=()=>`<button class='bkb' onclick='bk()' aria-label='Kembali'>‹</button>`;
@@ -1094,7 +1108,7 @@ function bk(){let k=HS.pop();while(k===tab&&HS.length)k=HS.pop();go(k&&k!==tab?k
 const ORD={home:0,trx:1,chat:2,kal:3,rep:4},sgp={};
 function seg(){document.querySelectorAll('#v .seg').forEach((s,i)=>{const b=s.querySelector('b.on');if(!b)return;const key=tab+':'+i+':'+s.querySelectorAll('b').length,r={l:b.offsetLeft,w:b.offsetWidth},o=sgp[key],t=document.createElement('i');t.className='th';s.prepend(t);const f=p=>{t.style.left=p.l+'px';t.style.width=p.w+'px'};f(o||r);t.getBoundingClientRect();f(r);sgp[key]=r;if(o&&o.l!==r.l){let n=s.nextElementSibling;while(n){n.classList.add('fd');n=n.nextElementSibling}}})}
 let dk0=today();setInterval(()=>{if(today()!==dk0){dk0=today();render()}gsAuto()},60000);
-if(!S.fb&&FB_DEFAULT)S.fb=FB_DEFAULT;if(!S.ses){showGate();setTimeout(gOneTap,0)}render(1);fbInit();setTimeout(gsAuto,3000);
+if(!S.fb&&FB_DEFAULT)S.fb=FB_DEFAULT;if(!S.ses){showGate();setTimeout(gOneTap,0)}render(1);fbInit().catch(()=>{});setTimeout(gsAuto,3000);
 const W='<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/><path d="M16 13.5h.01"/>';
 const ICM={
 '🍜':'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
