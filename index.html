@@ -470,6 +470,16 @@ body::after{background:var(--bg);background:color-mix(in srgb,var(--bg) 94%,tran
 #v[data-t=kal]>:nth-child(2){grid-column:1/9}
 #v[data-t=kal]>:nth-child(n+3){grid-column:9/13}
 }
+@keyframes gspin{to{transform:rotate(360deg)}}
+.gspin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:gspin .7s linear infinite;flex:none}
+.gbtn:disabled{opacity:.72;cursor:wait}
+@media (max-width:899px){
+html,body{width:100%;min-width:0}
+main,#v{width:100%;min-width:0}
+.shd{position:sticky;top:0;z-index:8;padding-top:max(8px,env(safe-area-inset-top,0px))}
+#tb{position:fixed;z-index:9;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px))}
+#v .card,#v .row{min-width:0}
+}
 </style>
 </head>
 <body>
@@ -574,6 +584,7 @@ const IC='fill="none"';
 const TABS=[['home','Beranda','<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>'],['kal','Kalender','<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'],['chat','Catat AI','<path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/>'],['rep','Laporan','<path d="M5 20V10M12 20V4M19 20v-7"/>'],['fc','Prakiraan','<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>'],['set','Atur','<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>']];
 function render(a,b){
  $('#v').dataset.t=tab;document.documentElement.dataset.tab=tab;$('#v').className=a?'ani'+(b?' i'+b:''):'';$('#v').innerHTML={home,chat,rep:ana,set,kal,trx,tgt:()=>plist('g'),hut:()=>plist('h'),ang,dmp,rcn,prf}[tab]();
+ hdr();
  if(a)$('#tb').innerHTML=NAV.map(([k,l,p])=>`<div class="tab ${k===tab?'on':''}${k==='chat'?' ctr':''}" onclick="go('${k}')"><svg viewBox="0 0 24 24">${p}</svg><span>${l}</span></div>`).join('');
  $('#cmp').style.display=tab==='chat'?'flex':'none';if(a){cnt();glass()}seg();slc();emph();mas();dmb();
 }
@@ -744,11 +755,22 @@ function plist(k){const g=k==='g',L=S[g?'gl':'db']||[];return pg(g?'Target':'Hut
 function pa(k){const n=$('#pn').value.trim(),t=+$('#pt').value.replace(/\D/g,'');if(!n||!t)return;const f=k==='g'?'gl':'db';S[f]=[...(S[f]||[]),{id:Date.now(),n,t,p:0}];save();render()}
 function pp(k,i){const f=k==='g'?'gl':'db',v=+$('#pp'+i).value.replace(/\D/g,'');if(!v)return;const x=S[f].find(y=>y.id===i);x.p+=v;if(k==='h')S.tx.push({id:Date.now(),t:'out',a:v,c:'Tagihan',n:'Bayar '+x.n,d:today(),w:wl()[0]});save();render()}
 function px(k,i){const f=k==='g'?'gl':'db';S[f]=S[f].filter(y=>y.id!==i);save();render()}
-let fa=null,fd=null,fu=null,fs='off',unsub=null,ctm=0,fbInitPromise=null;
+let fa=null,fd=null,fu=null,fs='off',unsub=null,ctm=0,fbInitPromise=null,cloudState='off';
 const ld=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
 const plo=()=>{const o={...S};delete o.fb;delete o.th;delete o.hide;delete o.chat;delete o.gs;delete o.pf;delete o.ses;return JSON.stringify(o)};
 const mg=(a,b)=>{const u=(x,y)=>{const m=new Map();[...(x||[]),...(y||[])].forEach(i=>m.set(i.id,i));return[...m.values()]};return{...a,...b,tx:u(a.tx,b.tx),gl:u(a.gl,b.gl),db:u(a.db,b.db),wl:[...new Set([...(a.wl||[]),...(b.wl||[])])],bud:{...a.bud,...b.bud}}};
-function cloud(n){if(!fu||!fd||isDemo)return;clearTimeout(ctm);ctm=setTimeout(()=>fd.doc('users/'+fu.uid+'/app/state').set({p:plo(),u:Date.now()}).catch(()=>{fs='err';if(tab==='set')render()}),n?0:800)}
+function cloud(n){
+ if(!fu||!fd||isDemo)return;
+ const uid=fu.uid,payload=plo();
+ cloudState='syncing';
+ clearTimeout(ctm);
+ ctm=setTimeout(()=>{
+  if(!fu||fu.uid!==uid)return;
+  fd.doc('users/'+uid+'/app/state').set({p:payload,u:Date.now()})
+   .then(()=>{if(!fu||fu.uid!==uid)return;cloudState='synced';if(tab==='prf'||tab==='set')render()})
+   .catch(()=>{if(!fu||fu.uid!==uid)return;cloudState='err';fs='err';if(tab==='set'||tab==='prf')render()})
+ },n?0:800)
+}
 async function fbInit(){
  if(!S.fb||fa)return;
  if(fbInitPromise)return fbInitPromise;
@@ -756,19 +778,22 @@ async function fbInit(){
   if(!window.firebase){await ld(b+'firebase-app-compat.js');await ld(b+'firebase-auth-compat.js');await ld(b+'firebase-firestore-compat.js')}
   if(!firebase.apps.length)firebase.initializeApp(S.fb);
   fa=firebase.auth();fd=firebase.firestore();
-  fa.onAuthStateChanged(u=>{fu=u;fs=u?'on':'off';if(u){onAuth(u);if(!isDemo)sub()}else{if(unsub)unsub();unsub=null}if(tab==='set')render()});
+  fa.onAuthStateChanged(u=>{fu=u;fs=u?'on':'off';cloudState=u?'syncing':'off';if(u){onAuth(u);if(!isDemo)sub()}else{if(unsub)unsub();unsub=null}if(tab==='set'||tab==='prf')render()});
   await fa.getRedirectResult().catch(e=>{gAuthError(e);if(tab==='set')render();else if($('#gate').classList.contains('on'))gateRender()});
  })().catch(e=>{fs='err';if(tab==='set')render()}).finally(()=>{fbInitPromise=null});
  return fbInitPromise;
 }
 function sub(){
  if(unsub)unsub();
+ cloudState='syncing';
  unsub=fd.doc('users/'+fu.uid+'/app/state').onSnapshot(d=>{
   const o=d.exists&&d.data().p?JSON.parse(d.data().p):null,k={fb:S.fb,th:S.th,hide:S.hide,chat:S.chat,gs:S.gs,pf:S.pf,ses:S.ses};
   if(S.sy!==fu.uid){S=o?{...mg(o,S),...k}:S;S.sy=fu.uid;S.ts=Date.now();save(1);cloud(1);render();return}
   if(!o){cloud(1);return}
+  cloudState='synced';
+  if(tab==='prf'||tab==='set')render();
   if((o.ts||0)>(S.ts||0)){S={...o,...k,sy:fu.uid};save(1);render()}else if((S.ts||0)>(o.ts||0))cloud(1)
- },()=>{fs='err';if(tab==='set')render()})
+ },()=>{fs='err';cloudState='err';if(tab==='set'||tab==='prf')render()})
 }
 function fbSave(){const t=$('#fbc').value,o={};for(const m of t.matchAll(/(\w+)\s*:\s*["']([^"']+)["']/g))o[m[1]]=m[2];if(!o.apiKey||!o.projectId){$('#fbc').value='';$('#fbc').placeholder='Konfigurasi tidak valid. Tempel seluruh blok firebaseConfig.';return}S.fb=o;save();fbInit();render()}
 async function fbIn(){try{if(!fa)await fbInit();if(!fa)throw new Error('Firebase Auth gagal dimuat');await fa.signInWithRedirect(new firebase.auth.GoogleAuthProvider())}catch(e){gAuthError(e);render()}}
@@ -977,7 +1002,7 @@ function gsAuto(){const g=S.gs;if(!g||!g.auto||!g.url||gsBusy||isDemo||g.day===t
 function gsUI(){
  const g=S.gs||{};
  return `<div class='card'><p class='sub'>Cadangan ke Google Sheets lewat Apps Script milikmu. Data tersimpan di spreadsheet-mu sendiri.</p><input id='gsu' class='fld' placeholder='URL Web App (\u2026/exec)' value="${esc(g.url||'')}"><input id='gst' class='fld' type='password' placeholder='Kode rahasia (sama dengan di script)' value="${esc(g.tok||'')}"><button class='btn' onclick='gsSave()'>Simpan &amp; uji koneksi</button><div class='g2'><button class='btn' onclick='gsBackup()'>Backup sekarang</button><button class='btn' style='background:var(--fill);color:var(--red)' onclick='gsRst(this)'>Pulihkan</button></div><label class='row' style='margin-top:12px'><input type='checkbox' ${g.auto?'checked':''} onchange='gsAutoSet(this.checked)'><span class='sub'>Backup otomatis sekali sehari</span></label><div class='sub' style='margin-top:8px'>${g.last?'Terakhir backup: '+new Date(g.last).toLocaleString('id-ID'):'Belum pernah backup'}</div>${gsm?`<div class='sub' style='margin-top:6px;color:var(--tx)'>${esc(gsm)}</div>`:''}<details style='margin-top:10px'><summary class='sub'>Kode Apps Script (tempel di Extensions \u2192 Apps Script)</summary><textarea id='gsc' class='fld' rows='8' readonly onclick='this.select()'>${esc(GS_CODE)}</textarea><button class='btn' style='background:var(--fill);color:var(--ct)' onclick='gsCopy()'>Salin kode</button></details></div>`}
-let isDemo=false,gtab='in',gmsg='';
+let isDemo=false,gtab='in',gmsg='',gBusy=false;
 const FB_DEFAULT={
  apiKey:'AIzaSyDtN3J2Ol18NWVcwO0QU0B7a1GNVB5h0dw',
  authDomain:'dompetku-8092e.firebaseapp.com',
@@ -1005,7 +1030,7 @@ function gateRender(){
  ['rn','re','rd','ri'].forEach(i=>{const e=$('#'+i);if(e&&typeof e.value==='string'&&e.value!=='')gv[i]=e.value});
  const h=new Date().getHours(),gr=h<11?'pagi':h<15?'siang':h<18?'sore':'malam',p=S.pf,cfg=!!(S.fb||FB_DEFAULT);
  const msg=gmsg?`<div class='gnote' style='color:var(--tx)'>${esc(gmsg)}</div>`:'';
- const gb=`<button class='btn gbtn' onclick='gLogin()'><span class='gg'>G</span>${gtab==='up'?'Daftar':'Masuk'} dengan Google</button>`;
+ const gb=`<button class='btn gbtn' onclick='gLogin()' ${gBusy?'disabled aria-busy="true"':''}>${gBusy?`<span class='gspin' aria-hidden='true'></span>`:`<span class='gg'>G</span>`}${gBusy?'Menghubungkan ke Google…':gtab==='up'?'Daftar dengan Google':'Masuk dengan Google'}</button>`;
  const cfgBox=cfg?'':`<div class='gnote'>Login Google belum diaktifkan oleh pemilik aplikasi.</div>`;
  const body=gtab==='in'?`${p&&!S.ses?`<button class='btn' onclick='${p.mode==='google'?'gLogin()':'gEnter()'}'>Lanjut sebagai ${esc(p.name)}</button>`:''}${gb}${msg}${cfgBox}`
  :`<input id='rn' class='fld' placeholder='Nama' value="${esc(gv.rn||'')}"><input id='re' class='fld' type='email' placeholder='Email (opsional)' value="${esc(gv.re||'')}"><input id='rd' class='fld' inputmode='numeric' placeholder='Tanggal gajian (25)' value="${esc(gv.rd||'')}"><input id='ri' class='fld' inputmode='numeric' placeholder='Pemasukan bulanan (opsional)' oninput='fi(this)' value="${esc(gv.ri||'')}"><button class='btn' onclick='gReg()'>Buat akun</button>${msg}<div class='gnote' style='text-align:center'>atau</div>${gb}`;
@@ -1016,6 +1041,7 @@ function gReg(){
  if(!n){gmsg='Isi nama dulu.';gateRender();return}
  S.pf={name:n,email:e,photo:'',mode:'local',since:today()};S.ses=true;S.as={...(S.as||{}),pd:d};if(i)S.as.inc=i;save();gmsg='';hideGate();tab='home';HS.length=0;render(1)}
 function gAuthError(e){
+ gBusy=false;
  const c=e&&e.code||'';
  gmsg=c==='auth/unauthorized-domain'?'Domain aplikasi belum diizinkan di Firebase Authentication.'
   :c==='auth/operation-not-allowed'?'Provider Google belum diaktifkan di Firebase Authentication.'
@@ -1025,11 +1051,13 @@ function gAuthError(e){
 }
 async function gLogin(){
  if(!(S.fb||FB_DEFAULT)){gmsg='Login Google belum aktif.';if(tab==='prf')render();else gateRender();return}
- if(!S.fb)S.fb=FB_DEFAULT;gmsg='Mengalihkan ke Google\u2026';if(tab!=='prf')gateRender();
+ if(gBusy)return;
+ if(!S.fb)S.fb=FB_DEFAULT;gBusy=true;gmsg='Mengalihkan ke Google…';if(tab==='prf')render();else gateRender();
  try{if(!fa)await fbInit();if(!fa)throw new Error('Firebase Auth gagal dimuat');await fa.signInWithRedirect(new firebase.auth.GoogleAuthProvider())}
  catch(e){gAuthError(e);if(tab==='prf')render();else gateRender()}}
 function gFb(){fbSave();setTimeout(gateRender,80)}
 function onAuth(u){
+ gBusy=false;
  if(isDemo)return;try{localStorage.removeItem('dompetku_out')}catch(e){}
  if(S.pf&&S.pf.uid&&S.pf.uid!==u.uid)S={tx:[],chat:[],th:S.th,fb:S.fb};
  S.pf={name:u.displayName||(S.pf&&S.pf.name)||'Pengguna',email:u.email||'',photo:u.photoURL||'',mode:'google',uid:u.uid,since:(S.pf&&S.pf.since)||today()};
@@ -1055,11 +1083,11 @@ function gDel(b){if(!b.dataset.s){b.dataset.s=1;b.textContent='Tap lagi untuk ha
 function prf(){
  const p=S.pf||{name:'Tamu',mode:'local'},g=p.mode==='google',dm=isDemo,ini=nm()[0].toUpperCase();
  const lbl=dm?['wn','Mode demo']:g?['ok','Akun Google terhubung']:['wn','Akun lokal'];
- const row=(a,b)=>`<div class='li row sp'><span class='sub'>${a}</span><span style='text-align:right'>${b}</span></div>`;
+ const row=(a,b)=>`<div class='li row sp'><span class='sub'>${a}</span><span style='text-align:right'>${b}</span></div>`,cloudLabel=cloudState==='syncing'?'menyinkronkan…':cloudState==='synced'?'tersinkron':cloudState==='err'?'gagal sinkron':'belum masuk';
  return pg('Profil','',`<div class='card' style='text-align:center'><div class='avb'>${ini}${p.photo?`<img src="${esc(p.photo)}" alt="" referrerpolicy="no-referrer">`:''}</div><div style='font-size:20px;font-weight:600;margin-top:10px'>${esc(p.name)}</div><div class='sub'>${esc(p.email||'Belum ada email')}</div><span class='st ${lbl[0]}' style='margin-top:8px'>${lbl[1]}</span></div>
  ${dm?`<div class='card'><div class='sub'>Data contoh. Perubahan tidak disimpan.</div><button class='btn' onclick='gOut()'>Keluar dari demo</button></div>`:`<div class='card'><b>Nama panggilan</b><div class='row' style='margin-top:8px'><input id='pnm' class='fld' style='margin:0' value="${esc(p.name)}"><button class='pill' onclick='pSave()'>Simpan</button></div></div>
- ${g?'':`<div class='card'><b>Hubungkan akun Google</b><button class='btn gbtn' onclick='gLink()'><span class='gg'>G</span>Hubungkan Google</button>${gmsg?`<div class='gnote' style='color:var(--tx)'>${esc(gmsg)}</div>`:''}</div>`}
- <div class='card'><b>Penyimpanan data</b>${row('Di perangkat ini',S.tx.length+' transaksi')}${row('Akun Google (cloud)',fu?'<span class="in">tersinkron</span>':S.fb?'belum masuk':'belum diaktifkan')}${row('Spreadsheet',S.gs&&S.gs.last?new Date(S.gs.last).toLocaleDateString('id-ID'):'belum backup')}<button class='btn' style='margin-top:10px' data-k='set' onclick='go(this.dataset.k)'>Pengaturan & backup</button></div>
+ ${g?'':`<div class='card'><b>Hubungkan akun Google</b><button class='btn gbtn' onclick='gLink()' ${gBusy?'disabled aria-busy="true"':''}>${gBusy?`<span class='gspin' aria-hidden='true'></span>`:`<span class='gg'>G</span>`}${gBusy?'Menghubungkan ke Google…':'Hubungkan Google'}</button>${gmsg?`<div class='gnote' style='color:var(--tx)'>${esc(gmsg)}</div>`:''}</div>`}
+ <div class='card'><b>Penyimpanan data</b>${row('Di perangkat ini',S.tx.length+' transaksi')}${row('Akun Google (cloud)',fu?`<span class='${cloudState==='err'?'out':'in'}'>${cloudLabel}</span>`:S.fb?'belum masuk':'belum diaktifkan')}${row('Spreadsheet',S.gs&&S.gs.last?new Date(S.gs.last).toLocaleDateString('id-ID'):'belum backup')}<button class='btn' style='margin-top:10px' data-k='set' onclick='go(this.dataset.k)'>Pengaturan & backup</button></div>
  <div class='card'><button class='btn' style='background:var(--fill);color:var(--ct)' onclick='gOut()'>Keluar</button><button class='btn' style='background:var(--fill);color:var(--red)' onclick='gDel(this)'>Hapus data</button>${pwaE?`<button class='btn' onclick='pwaInstall()'>Pasang di layar utama</button>`:''}<div class='gnote'>Keluar tidak menghapus data.</div></div>`}`)}
 const HS=[],bb=()=>`<button class='bkb' onclick='bk()' aria-label='Kembali'>‹</button>`;
 function bk(){let k=HS.pop();while(k===tab&&HS.length)k=HS.pop();go(k&&k!==tab?k:'home',1)}
@@ -1106,7 +1134,7 @@ const MAS='<svg class="mas" viewBox="2 2 66 66" fill="none" stroke="currentColor
 function mas1(){
  document.querySelectorAll('.card.hero,.gp').forEach(h=>{if(!h.querySelector(':scope>.mas'))h.insertAdjacentHTML('beforeend',MAS)});
  document.querySelectorAll('#v[data-t=home] .card[style*="text-align:center"]').forEach(c=>{if(!c.querySelector('.mas'))c.insertAdjacentHTML('afterbegin',MAS.replace('class="mas"','class="mas em"'))})}
-function hdr(){const v=document.getElementById('v'),f=v&&v.firstElementChild;document.querySelectorAll('#v>.shd').forEach(e=>{if(e!==f)e.classList.remove('shd')});if(f&&v.dataset.t!=='chat')f.classList.add('shd')}
+function hdr(){const v=document.getElementById('v'),f=v&&v.firstElementChild;document.querySelectorAll('#v>.shd').forEach(e=>{if(e!==f)e.classList.remove('shd')});if(f)f.classList.add('shd')}
 addEventListener('scroll',()=>document.documentElement.classList.toggle('sc',scrollY>6),{passive:true});
 function mini(){
  if(!S.tx.length)return'';
