@@ -1,1 +1,35 @@
-# dompetku
+# Dompetku
+
+Aplikasi pencatat keuangan pribadi (PWA). Satu file `index.html`, tanpa build, bisa dipasang di layar utama Chrome Android.
+
+## Isi proyek
+| File | Fungsi |
+|---|---|
+| `index.html` | seluruh aplikasi |
+| `manifest.webmanifest` | metadata PWA (nama, ikon, warna) |
+| `sw.js` | service worker, agar app tetap terbuka saat offline |
+| `icons/` | ikon 192, 512, maskable, apple-touch, favicon |
+| `vercel.json` | header untuk Vercel (opsional) |
+
+## Jalankan lokal
+```bash
+python3 -m http.server 8080   # lalu buka http://localhost:8080
+```
+Service worker hanya aktif lewat `https://` atau `localhost`, bukan lewat `file://`.
+
+## Deploy
+- **GitHub Pages:** Settings > Pages > Deploy from branch (`main`, folder `/root`). Semua path relatif, jadi aman dipakai di subfolder.
+- **Vercel / Netlify:** impor repo, tanpa build command, output directory `.`
+
+## Pasang di Chrome Android
+Buka alamat situs di Chrome, lalu menu (tiga titik) > **Instal aplikasi** / **Tambahkan ke layar utama**. Di app, menu Profil juga menampilkan tombol **Pasang di layar utama** saat Chrome mengizinkan.
+
+## Login Google (opsional)
+Isi dua konstanta di `index.html`:
+- `FB_DEFAULT`: objek firebaseConfig (Firebase Console > Project settings > Your apps > Web)
+- `GCID`: Web client ID (Firebase Console > Authentication > Sign-in method > Google)
+
+Tambahkan domain situs ke **Authorized domains** di Firebase Authentication.
+
+## Memperbarui
+Setelah mengubah `index.html`, naikkan nomor `V` di `sw.js` (mis. `dompetku-v2`) supaya pengguna menerima versi baru.
