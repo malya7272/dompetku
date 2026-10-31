@@ -744,19 +744,22 @@ function plist(k){const g=k==='g',L=S[g?'gl':'db']||[];return pg(g?'Target':'Hut
 function pa(k){const n=$('#pn').value.trim(),t=+$('#pt').value.replace(/\D/g,'');if(!n||!t)return;const f=k==='g'?'gl':'db';S[f]=[...(S[f]||[]),{id:Date.now(),n,t,p:0}];save();render()}
 function pp(k,i){const f=k==='g'?'gl':'db',v=+$('#pp'+i).value.replace(/\D/g,'');if(!v)return;const x=S[f].find(y=>y.id===i);x.p+=v;if(k==='h')S.tx.push({id:Date.now(),t:'out',a:v,c:'Tagihan',n:'Bayar '+x.n,d:today(),w:wl()[0]});save();render()}
 function px(k,i){const f=k==='g'?'gl':'db';S[f]=S[f].filter(y=>y.id!==i);save();render()}
-let fa=null,fd=null,fu=null,fs='off',unsub=null,ctm=0;
+let fa=null,fd=null,fu=null,fs='off',unsub=null,ctm=0,fbInitPromise=null;
 const ld=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
 const plo=()=>{const o={...S};delete o.fb;delete o.th;delete o.hide;delete o.chat;delete o.gs;delete o.pf;delete o.ses;return JSON.stringify(o)};
 const mg=(a,b)=>{const u=(x,y)=>{const m=new Map();[...(x||[]),...(y||[])].forEach(i=>m.set(i.id,i));return[...m.values()]};return{...a,...b,tx:u(a.tx,b.tx),gl:u(a.gl,b.gl),db:u(a.db,b.db),wl:[...new Set([...(a.wl||[]),...(b.wl||[])])],bud:{...a.bud,...b.bud}}};
 function cloud(n){if(!fu||!fd||isDemo)return;clearTimeout(ctm);ctm=setTimeout(()=>fd.doc('users/'+fu.uid+'/app/state').set({p:plo(),u:Date.now()}).catch(()=>{fs='err';if(tab==='set')render()}),n?0:800)}
 async function fbInit(){
- if(!S.fb)return;
- try{const b='https://www.gstatic.com/firebasejs/10.12.2/';
+ if(!S.fb||fa)return;
+ if(fbInitPromise)return fbInitPromise;
+ fbInitPromise=(async()=>{const b='https://www.gstatic.com/firebasejs/10.12.2/';
   if(!window.firebase){await ld(b+'firebase-app-compat.js');await ld(b+'firebase-auth-compat.js');await ld(b+'firebase-firestore-compat.js')}
   if(!firebase.apps.length)firebase.initializeApp(S.fb);
   fa=firebase.auth();fd=firebase.firestore();
   fa.onAuthStateChanged(u=>{fu=u;fs=u?'on':'off';if(u){onAuth(u);if(!isDemo)sub()}else{if(unsub)unsub();unsub=null}if(tab==='set')render()});
- }catch(e){fs='err';if(tab==='set')render()}
+  await fa.getRedirectResult().catch(e=>{gAuthError(e);if(tab==='set')render();else if($('#gate').classList.contains('on'))gateRender()});
+ })().catch(e=>{fs='err';if(tab==='set')render()}).finally(()=>{fbInitPromise=null});
+ return fbInitPromise;
 }
 function sub(){
  if(unsub)unsub();
@@ -768,7 +771,7 @@ function sub(){
  },()=>{fs='err';if(tab==='set')render()})
 }
 function fbSave(){const t=$('#fbc').value,o={};for(const m of t.matchAll(/(\w+)\s*:\s*["']([^"']+)["']/g))o[m[1]]=m[2];if(!o.apiKey||!o.projectId){$('#fbc').value='';$('#fbc').placeholder='Konfigurasi tidak valid. Tempel seluruh blok firebaseConfig.';return}S.fb=o;save();fbInit();render()}
-function fbIn(){if(!fa){fbInit().then(()=>fa&&fbIn());return}fa.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(()=>{fs='err';render()})}
+async function fbIn(){try{if(!fa)await fbInit();if(!fa)throw new Error('Firebase Auth gagal dimuat');await fa.signInWithRedirect(new firebase.auth.GoogleAuthProvider())}catch(e){gAuthError(e);render()}}
 function fbOut(){if(fa)fa.signOut()}
 function fbDel(){if(fa)fa.signOut();S.fb=null;S.sy=null;fs='off';save(1);render()}
 function cl(){
@@ -1012,11 +1015,19 @@ function gReg(){
  const n=($('#rn').value||'').trim(),e=($('#re').value||'').trim(),d=Math.min(31,Math.max(1,+($('#rd').value||'').replace(/\D/g,'')||25)),i=+($('#ri').value||'').replace(/\D/g,'')||0;
  if(!n){gmsg='Isi nama dulu.';gateRender();return}
  S.pf={name:n,email:e,photo:'',mode:'local',since:today()};S.ses=true;S.as={...(S.as||{}),pd:d};if(i)S.as.inc=i;save();gmsg='';hideGate();tab='home';HS.length=0;render(1)}
+function gAuthError(e){
+ const c=e&&e.code||'';
+ gmsg=c==='auth/unauthorized-domain'?'Domain aplikasi belum diizinkan di Firebase Authentication.'
+  :c==='auth/operation-not-allowed'?'Provider Google belum diaktifkan di Firebase Authentication.'
+  :c==='auth/network-request-failed'?'Koneksi Firebase gagal. Periksa internet lalu coba lagi.'
+  :c==='auth/invalid-api-key'?'Firebase API key tidak valid.'
+  :`Gagal masuk dengan Google${c?' ('+c+')':''}. Coba lagi atau periksa pengaturan Firebase.`;
+}
 async function gLogin(){
  if(!(S.fb||FB_DEFAULT)){gmsg='Login Google belum aktif.';if(tab==='prf')render();else gateRender();return}
- if(!S.fb)S.fb=FB_DEFAULT;gmsg='Membuka jendela Google\u2026';if(tab!=='prf')gateRender();
- try{if(!fa)await fbInit();if(!fa)throw 0;await fa.signInWithPopup(new firebase.auth.GoogleAuthProvider());gmsg=''}
- catch(e){gmsg='Gagal masuk. Izinkan popup lalu coba lagi.';if(tab==='prf')render();else gateRender()}}
+ if(!S.fb)S.fb=FB_DEFAULT;gmsg='Mengalihkan ke Google\u2026';if(tab!=='prf')gateRender();
+ try{if(!fa)await fbInit();if(!fa)throw new Error('Firebase Auth gagal dimuat');await fa.signInWithRedirect(new firebase.auth.GoogleAuthProvider())}
+ catch(e){gAuthError(e);if(tab==='prf')render();else gateRender()}}
 function gFb(){fbSave();setTimeout(gateRender,80)}
 function onAuth(u){
  if(isDemo)return;try{localStorage.removeItem('dompetku_out')}catch(e){}
