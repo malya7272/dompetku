@@ -24,12 +24,11 @@ Service worker hanya aktif lewat `https://` atau `localhost`, bukan lewat `file:
 ## Pasang di Chrome Android
 Buka alamat situs di Chrome, lalu menu (tiga titik) > **Instal aplikasi** / **Tambahkan ke layar utama**. Di app, menu Profil juga menampilkan tombol **Pasang di layar utama** saat Chrome mengizinkan.
 
-## Login Google (opsional)
-Isi dua konstanta di `index.html`:
-- `FB_DEFAULT`: objek firebaseConfig (Firebase Console > Project settings > Your apps > Web)
-- `GCID`: Web client ID (Firebase Console > Authentication > Sign-in method > Google)
+## Login Google
+Firebase Web config sudah diisi di konstanta `FB_DEFAULT` pada `index.html`. Tombol Google pada halaman **Daftar** dan **Masuk** menggunakan Firebase Auth; `GCID` hanya diperlukan untuk mengaktifkan Google One Tap.
+Isi `GCID` dengan Web client ID dari Firebase Console > Authentication > Sign-in method > Google hanya jika ingin mengaktifkan Google One Tap.
 
-Tambahkan domain situs ke **Authorized domains** di Firebase Authentication.
+Aktifkan provider Google dan tambahkan domain situs ke **Authorized domains** di Firebase Authentication. Pendaftaran Google membuat atau memakai akun Firebase secara otomatis, menyimpan profil pengguna, menyinkronkan data ke Firestore, lalu membuka halaman utama. Firebase Web config digunakan di browser dan bukan kredensial rahasia; jangan menaruh service-account key di aplikasi.
 
 ## Memperbarui
-Setelah mengubah `index.html`, naikkan nomor `V` di `sw.js` (mis. `dompetku-v2`) supaya pengguna menerima versi baru.
+Setelah mengubah `index.html`, naikkan nomor `V` di `sw.js` supaya pengguna menerima versi baru.

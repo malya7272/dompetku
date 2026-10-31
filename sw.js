@@ -1,5 +1,5 @@
-// Service worker Dompetku: app shell offline. Naikkan nomor V setiap kali index.html diperbarui.
-const V='dompetku-v1',SHELL=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/favicon.svg'];
+// Service worker Dompetku: app shell offline. Naikkan nomor V saat file app shell berubah.
+const V='dompetku-v2',SHELL=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/favicon.svg'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{

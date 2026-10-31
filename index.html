@@ -975,8 +975,17 @@ function gsUI(){
  const g=S.gs||{};
  return `<div class='card'><p class='sub'>Cadangan ke Google Sheets lewat Apps Script milikmu. Data tersimpan di spreadsheet-mu sendiri.</p><input id='gsu' class='fld' placeholder='URL Web App (\u2026/exec)' value="${esc(g.url||'')}"><input id='gst' class='fld' type='password' placeholder='Kode rahasia (sama dengan di script)' value="${esc(g.tok||'')}"><button class='btn' onclick='gsSave()'>Simpan &amp; uji koneksi</button><div class='g2'><button class='btn' onclick='gsBackup()'>Backup sekarang</button><button class='btn' style='background:var(--fill);color:var(--red)' onclick='gsRst(this)'>Pulihkan</button></div><label class='row' style='margin-top:12px'><input type='checkbox' ${g.auto?'checked':''} onchange='gsAutoSet(this.checked)'><span class='sub'>Backup otomatis sekali sehari</span></label><div class='sub' style='margin-top:8px'>${g.last?'Terakhir backup: '+new Date(g.last).toLocaleString('id-ID'):'Belum pernah backup'}</div>${gsm?`<div class='sub' style='margin-top:6px;color:var(--tx)'>${esc(gsm)}</div>`:''}<details style='margin-top:10px'><summary class='sub'>Kode Apps Script (tempel di Extensions \u2192 Apps Script)</summary><textarea id='gsc' class='fld' rows='8' readonly onclick='this.select()'>${esc(GS_CODE)}</textarea><button class='btn' style='background:var(--fill);color:var(--ct)' onclick='gsCopy()'>Salin kode</button></details></div>`}
 let isDemo=false,gtab='in',gmsg='';
-const FB_DEFAULT=null; // isi dengan objek firebaseConfig agar login Google aktif untuk semua pengguna
-const GCID=''; // Web client ID Google (Firebase Console > Authentication > Google). Diisi sekali, agar akun Google terdeteksi otomatis
+const FB_DEFAULT={
+ apiKey:'AIzaSyDtN3J2Ol18NWVcwO0QU0B7a1GNVB5h0dw',
+ authDomain:'dompetku-8092e.firebaseapp.com',
+ databaseURL:'https://dompetku-8092e-default-rtdb.asia-southeast1.firebasedatabase.app',
+ projectId:'dompetku-8092e',
+ storageBucket:'dompetku-8092e.firebasestorage.app',
+ messagingSenderId:'661055554058',
+ appId:'1:661055554058:web:ba363a46fc68cadf4fd5f3',
+ measurementId:'G-HWPE2BEFPE'
+};
+const GCID=''; // Web client ID Google untuk mengaktifkan Google One Tap
 const gv={},nm=()=>((S.pf&&S.pf.name)||'Arif').split(' ')[0];
 const avi=()=>nm()[0].toUpperCase()+(S.pf&&S.pf.photo?`<img src="${esc(S.pf.photo)}" alt="" referrerpolicy="no-referrer">`:'');
 function dmb(){const d=$('#demo');if(d&&d.style)d.style.display=isDemo?'flex':'none'}
@@ -993,7 +1002,7 @@ function gateRender(){
  ['rn','re','rd','ri'].forEach(i=>{const e=$('#'+i);if(e&&typeof e.value==='string'&&e.value!=='')gv[i]=e.value});
  const h=new Date().getHours(),gr=h<11?'pagi':h<15?'siang':h<18?'sore':'malam',p=S.pf,cfg=!!(S.fb||FB_DEFAULT);
  const msg=gmsg?`<div class='gnote' style='color:var(--tx)'>${esc(gmsg)}</div>`:'';
- const gb=`<button class='btn gbtn' onclick='gLogin()'><span class='gg'>G</span>Lanjutkan dengan Google</button>`;
+ const gb=`<button class='btn gbtn' onclick='gLogin()'><span class='gg'>G</span>${gtab==='up'?'Daftar':'Masuk'} dengan Google</button>`;
  const cfgBox=cfg?'':`<div class='gnote'>Login Google belum diaktifkan oleh pemilik aplikasi.</div>`;
  const body=gtab==='in'?`${p&&!S.ses?`<button class='btn' onclick='${p.mode==='google'?'gLogin()':'gEnter()'}'>Lanjut sebagai ${esc(p.name)}</button>`:''}${gb}${msg}${cfgBox}`
  :`<input id='rn' class='fld' placeholder='Nama' value="${esc(gv.rn||'')}"><input id='re' class='fld' type='email' placeholder='Email (opsional)' value="${esc(gv.re||'')}"><input id='rd' class='fld' inputmode='numeric' placeholder='Tanggal gajian (25)' value="${esc(gv.rd||'')}"><input id='ri' class='fld' inputmode='numeric' placeholder='Pemasukan bulanan (opsional)' oninput='fi(this)' value="${esc(gv.ri||'')}"><button class='btn' onclick='gReg()'>Buat akun</button>${msg}<div class='gnote' style='text-align:center'>atau</div>${gb}`;
