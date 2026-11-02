@@ -480,6 +480,58 @@ main,#v{width:100%;min-width:0}
 #tb{position:fixed;z-index:9;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px))}
 #v .card,#v .row{min-width:0}
 }
+
+/* Mobile layout hardening: keep the app readable on narrow phones. */
+@media (max-width:899px){
+  html,body{width:100%;min-width:0;overflow-x:hidden}
+  body{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}
+  main{width:100%;min-width:0;padding-left:clamp(12px,4vw,18px);padding-right:clamp(12px,4vw,18px)}
+  #v{width:100%;min-width:0}
+  #v>.shd{padding-right:64px!important;min-height:54px}
+  #v h1{max-width:100%;font-size:clamp(23px,6vw,28px);overflow-wrap:anywhere}
+  #v .card{max-width:100%;min-width:0;padding:14px;margin:10px 0;border-radius:18px}
+  #v .card.hero{padding:18px 16px 40px}
+  #v .g2,#v .g3{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #v .g3{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  #v .g2>* ,#v .g3>*{min-width:0}
+  #v .row{min-width:0;max-width:100%}
+  #v .row>*{min-width:0}
+  #v .tile,#v .hb{min-width:0}
+  #v .tile b{white-space:normal;overflow-wrap:anywhere}
+  #v .dw .am{white-space:normal;text-align:right;overflow-wrap:anywhere}
+  #v .li.row>b{flex:none;white-space:nowrap;font-size:clamp(11px,3.4vw,14px)}
+  #v .fld{width:100%;max-width:100%;min-width:0}
+  #v svg{max-width:100%}
+  #cmp{left:12px;right:12px;width:auto;max-width:none;padding:6px;gap:8px}
+  #cmp input{width:100%;min-width:0}
+  #tb{left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));width:auto;max-width:none;gap:0;padding-left:4px;padding-right:4px}
+  #tb .tab{min-width:0;overflow:hidden}
+  #tb .tab span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #tb .tab.ctr{width:54px;margin-left:4px;margin-right:4px}
+  .pane{width:100%;max-width:560px}
+}
+@media (max-width:380px){
+  main{padding-left:12px;padding-right:12px}
+  #v>.shd{margin-left:-12px!important;margin-right:-12px!important;padding-left:12px!important;padding-right:58px!important}
+  #v .card{padding:12px;border-radius:16px}
+  #v .card.hero{padding:16px 14px 38px}
+  #v .sumr{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #v .sumr .ringw{grid-column:1/-1;flex-direction:row;justify-content:center;gap:10px}
+  #v .qk{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+  #v .qi{padding:10px 2px 8px;border-radius:14px}
+  #v .qc{font-size:21px}
+  #v .qi b{font-size:10px}
+  #v .g3{gap:6px}
+  #v .g3 .sm{padding:10px 7px}
+  #v .g3 .sm b{font-size:clamp(10px,3vw,12px);overflow-wrap:anywhere}
+  #v .cc{height:42px;border-radius:9px}
+  #tb .tab{font-size:9px}
+  #tb .tab svg{width:20px;height:20px}
+  #tb .tab.ctr{width:48px;height:48px;margin:-24px 3px 2px}
+  #tb .tab.ctr svg{width:23px;height:23px}
+  #tg{width:34px;height:34px;right:12px}
+  .pane{padding-left:12px;padding-right:12px}
+}
 </style>
 </head>
 <body>
