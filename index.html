@@ -392,8 +392,8 @@ small,.cap{font-size:11px;font-weight:600;letter-spacing:.6px}
 .gp>.mas{position:absolute;top:18px;right:18px;width:60px;height:60px;color:#fff;--mf:var(--h1);pointer-events:none}
 .mas.em{width:76px;height:76px;margin:2px auto 8px}
 /* header sticky */
-.shd{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin:0 -18px 6px!important;padding:8px 18px 10px;transition:box-shadow .2s}
-.sc .shd{background:var(--bg);background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);box-shadow:0 1px 0 var(--line)}
+.shd{position:sticky;top:0;align-self:start;z-index:20;margin:0 -18px 6px!important;padding:8px 18px 10px;background:var(--bg);transition:box-shadow .2s;isolation:isolate}
+.sc .shd{background:var(--bg);background:color-mix(in srgb,var(--bg) 96%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);box-shadow:0 1px 0 var(--line)}
 body::after{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);z-index:5;opacity:0;pointer-events:none;transition:opacity .2s}
 .sc body::after{opacity:1}
 @media (min-width:900px){.shd{margin:0!important;padding:12px 0 10px}#v[data-t=home]>.shd{padding-right:56px}body::after{display:none}}
@@ -489,7 +489,7 @@ main,#v{width:100%;min-width:0}
   body{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}
   main{width:100%;min-width:0;padding-left:clamp(12px,4vw,18px);padding-right:clamp(12px,4vw,18px)}
   #v{width:100%;min-width:0}
-  #v>.shd{padding-right:64px!important;min-height:54px}
+  #v>.shd{position:sticky;top:0;z-index:20;align-self:start;padding-right:64px!important;padding-top:max(8px,env(safe-area-inset-top,0px));min-height:54px;background:var(--bg);background:color-mix(in srgb,var(--bg) 96%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4)}
   #v h1{max-width:100%;font-size:clamp(23px,6vw,28px);overflow-wrap:anywhere}
   #v .card{max-width:100%;min-width:0;padding:14px;margin:10px 0;border-radius:18px}
   #v .card.hero{padding:18px 16px 40px}
