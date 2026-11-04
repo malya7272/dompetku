@@ -87,7 +87,7 @@ small,.cap{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spaci
 .tab.on svg{animation:bn .45s}
 button,.tab,.chip,.seg b,.li{transition:transform .15s,background-color .25s}
 button:active,.tab:active,.chip:active,.seg b:active{transform:scale(.95)}.li:active{opacity:.6}.card{transition:background-color .35s}
-#tg{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:16px;width:40px;height:40px;border:0;border-radius:50%;background:var(--card);color:var(--tx);box-shadow:0 1px 6px #0002;z-index:6;display:grid;place-items:center;padding:0}
+#tg{position:absolute;top:8px;right:0;width:40px;height:40px;border:0;border-radius:50%;background:var(--card);color:var(--tx);box-shadow:0 1px 6px #0002;z-index:35;display:grid;place-items:center;padding:0}
 #tg svg{grid-area:1/1;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .55s cubic-bezier(.3,1.4,.5,1),opacity .35s}
 #tg .moon{transform:rotate(-90deg) scale(0);opacity:0}#tg[data-d] .moon{transform:none;opacity:1}#tg[data-d] .sun{transform:rotate(90deg) scale(0);opacity:0}
 .tt,.tt *{transition:background-color .45s,color .45s,border-color .45s,stroke .45s!important}
@@ -119,7 +119,7 @@ small,.cap{font-size:10.5px}
 .chip{font-size:13px;padding:6px 11px}
 .sm{padding:10px 9px;margin:10px 0 0}.sm b{font-size:12.5px}
 .bars{height:76px}.nv{font-size:20px}
-#tg{width:36px;height:36px;top:calc(10px + env(safe-area-inset-top,0px));right:14px}
+#tg{width:36px;height:36px;top:8px;right:0}
 [style*="margin:18px 6px 6px"]{margin:12px 4px 4px!important}
 [style*="font-size:18px"]{font-size:16px!important}
 .ch{display:flex;align-items:center;gap:8px}
@@ -531,7 +531,7 @@ main,#v{width:100%;min-width:0}
   #tb .tab svg{width:20px;height:20px}
   #tb .tab.ctr{width:48px;height:48px;margin:-24px 3px 2px}
   #tb .tab.ctr svg{width:23px;height:23px}
-  #tg{width:34px;height:34px;right:12px}
+  #tg{width:34px;height:34px;right:0}
   .pane{padding-left:12px;padding-right:12px}
 }
 </style>
@@ -1202,7 +1202,7 @@ const MAS='<svg class="mas" viewBox="2 2 66 66" fill="none" stroke="currentColor
 function mas1(){
  document.querySelectorAll('.card.hero,.gp').forEach(h=>{if(!h.querySelector(':scope>.mas'))h.insertAdjacentHTML('beforeend',MAS)});
  document.querySelectorAll('#v[data-t=home] .card[style*="text-align:center"]').forEach(c=>{if(!c.querySelector('.mas'))c.insertAdjacentHTML('afterbegin',MAS.replace('class="mas"','class="mas em"'))})}
-function hdr(){const v=document.getElementById('v'),f=v&&v.firstElementChild;document.querySelectorAll('#v>.shd').forEach(e=>{if(e!==f)e.classList.remove('shd')});if(f)f.classList.add('shd')}
+function hdr(){const v=document.getElementById('v'),f=v&&v.firstElementChild,t=document.getElementById('tg');document.querySelectorAll('#v>.shd').forEach(e=>{if(e!==f)e.classList.remove('shd')});if(f){f.classList.add('shd');if(t&&t.parentElement!==f)f.appendChild(t)}}
 addEventListener('scroll',()=>document.documentElement.classList.toggle('sc',scrollY>6),{passive:true});
 function mini(){
  if(!S.tx.length)return'';
