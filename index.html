@@ -47,6 +47,10 @@ small,.cap{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spaci
 #cmp{display:none;position:fixed;left:0;right:0;bottom:calc(54px + env(safe-area-inset-bottom,0px));gap:8px;padding:8px 12px;background:var(--bar);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:4}
 #cmp input{flex:1;border:0;border-radius:20px;background:var(--fill);padding:10px 14px;font-size:16px;color:var(--tx);outline:0}
 #cmp button{border:0;border-radius:50%;width:38px;height:38px;background:var(--blue);color:#fff;font-size:18px}
+#cmp #quick-toggle{display:none;place-items:center;flex:none;background:var(--fill);color:var(--tx);font-size:0}
+#cmp #quick-toggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+#cmp #quick-toggle[aria-expanded=true] svg{transform:rotate(180deg)}
+#cmp #send-chat{flex:none}
 #msgs{padding-bottom:70px}
 #v[data-t=chat] #msgs{padding-bottom:150px}
 html.has-quick-record #v[data-t=chat] #msgs{padding-bottom:210px}
@@ -958,7 +962,7 @@ html[data-theme=amber] .chat-slide .gc{background:var(--bg-surface);color:var(--
 </div>
 <main id="v"></main>
 <div id="quick-record" aria-label="Pintasan catatan cepat"></div>
-<div id="cmp"><input id="ci" placeholder="Contoh: makan siang 25rb" enterkeyhint="send" autocomplete="off"><button onclick="send()">↑</button></div>
+<div id="cmp"><input id="ci" placeholder="Contoh: makan siang 25rb" enterkeyhint="send" autocomplete="off"><button id="quick-toggle" type="button" aria-label="Buka catatan cepat" aria-expanded="false" onclick="toggleQuickRecords()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><button id="send-chat" type="button" aria-label="Kirim catatan" onclick="send()">↑</button></div>
 <div id="tb"></div>
 <div id="sheet" onclick="if(event.target===this)closeSheet()"></div>
 <div id="gate"></div>
@@ -1132,7 +1136,7 @@ function render(a,b){
  desktopSync();
  hdr();
  if(a)$('#tb').innerHTML=NAV.map(([k,l,p])=>`<div class="tab ${k===tab?'on':''}${k==='chat'?' ctr':''}" aria-label="${l}" title="${l}" onclick="go('${k}')"><svg viewBox="0 0 24 24">${p}</svg>${k==='chat'?'':`<span>${l}</span>`}</div>`).join('');
- $('#cmp').style.display=tab==='chat'?'flex':'none';const quick=$('#quick-record'),showQuick=tab==='chat'&&freq().length>0;quick.innerHTML=showQuick?quickRecords():'';quick.style.display=showQuick?'block':'none';document.documentElement.classList.toggle('has-quick-record',showQuick);if(a){cnt();glass()}seg();slc();emph();mas();dmb();chatCarouselInit();
+ $('#cmp').style.display=tab==='chat'?'flex':'none';const quick=$('#quick-record'),toggle=$('#quick-toggle'),hasRecords=tab==='chat'&&freq().length>0;if(!hasRecords)quickRecordsOpen=false;const showQuick=hasRecords&&quickRecordsOpen;quick.innerHTML=showQuick?quickRecords():'';quick.style.display=showQuick?'block':'none';toggle.style.display=hasRecords?'grid':'none';toggle.setAttribute('aria-expanded',String(quickRecordsOpen));toggle.setAttribute('aria-label',quickRecordsOpen?'Tutup catatan cepat':'Buka catatan cepat');document.documentElement.classList.toggle('has-quick-record',showQuick);if(a){cnt();glass()}seg();slc();emph();mas();dmb();chatCarouselInit();
 }
 let desktopViewport=matchMedia('(min-width:1024px)').matches;
 addEventListener('resize',()=>{const next=matchMedia('(min-width:1024px)').matches;if(next!==desktopViewport){desktopViewport=next;render(1);window.scrollTo(0,0)}});
@@ -1434,14 +1438,14 @@ function cl(){
  const st=fs==='err'?`<p class='sub' style='color:var(--red)'>Gagal terhubung. Periksa pengaturan Firebase.</p>`:'';
  if(!S.fb)return `<div class='card'><p class='sub'>Tempel firebaseConfig dari Firebase Console.</p><textarea id='fbc' class='fld' rows='5' placeholder='const firebaseConfig = { apiKey: ..., authDomain: ..., projectId: ... };'></textarea><button class='btn' onclick='fbSave()'>Simpan</button></div>`;
  return `<div class='card'>${st}${fu?`<div class='row sp'><div><b>${esc(fu.displayName||'Akun Google')}</b><div class='sub'>${esc(fu.email||'')}</div></div><span class='in'>● Tersinkron</span></div><div class='g2'><button class='btn' onclick='cloud(1)'>Sinkron sekarang</button><button class='btn' style='background:var(--fill);color:var(--red)' onclick='fbOut()'>Keluar</button></div>`:`<p class='sub'>Project: ${esc(S.fb.projectId)}</p><button class='btn' onclick='fbIn()'>Masuk dengan Google</button>`}<button class='btn' style='background:var(--fill);color:var(--sub)' onclick='fbDel()'>Hapus konfigurasi</button></div>`}
-let il=null;
+let il=null,quickRecordsOpen=false;
 const kk=x=>String(x.n).toLowerCase().trim()+'|'+x.t;
 function freq(){
  const m={},t0=new Date(today()+'T00:00:00');
  S.tx.forEach(x=>{const k=kk(x),o=m[k]||(m[k]={k,n:x.n,t:x.t,c:x.c,w:x.w,cnt:0,am:{},last:'',la:0});o.cnt++;o.am[x.a]=(o.am[x.a]||0)+1;if(x.d>=o.last){o.last=x.d;o.c=x.c;o.w=x.w;o.n=x.n;o.la=x.a}});
  return Object.values(m).filter(o=>o.cnt>=2).map(o=>{const e=Object.entries(o.am).sort((p,r)=>r[1]-p[1]);o.a=e[1]&&e[1][1]===e[0][1]?o.la:+e[0][0];o.sc=o.cnt*(1+1/(1+(t0-new Date(o.last+'T00:00:00'))/864e5/14));return o}).sort((p,r)=>r.sc-p.sc)}
 function fmatch(s){const l=s.toLowerCase().replace(/\b(kemarin lusa|kemarin dulu|kemarin|hari ini|tanggal|tgl)\b\s*\d*/g,'').trim();if(l.length<3)return null;return freq().find(x=>{const n=x.n.toLowerCase();return l.includes(n)||n.includes(l)})||null}
-function qa(i){const x=freq()[i];if(!x)return;const d=today();S.tx.push({id:Date.now(),t:x.t,a:x.a,c:x.c,n:x.n,d,w:x.w||wl()[0]});S.chat.push({id:chatId(),r:'u',t:x.n+' '+kf(x.a)},{id:chatId(),r:'a',t:'✅ '+(x.t==='in'?'Pemasukan ':'Pengeluaran ')+rp(x.a)+' · '+x.c+'\n“'+x.n+'” · hari ini\nKeluar hari ini: '+rp(sum(inD(d),'out'))+bw()});save();render();window.scrollTo(0,document.body.scrollHeight)}
+function qa(i){const x=freq()[i];if(!x)return;quickRecordsOpen=false;const d=today();S.tx.push({id:Date.now(),t:x.t,a:x.a,c:x.c,n:x.n,d,w:x.w||wl()[0]});S.chat.push({id:chatId(),r:'u',t:x.n+' '+kf(x.a)},{id:chatId(),r:'a',t:'✅ '+(x.t==='in'?'Pemasukan ':'Pengeluaran ')+rp(x.a)+' · '+x.c+'\n“'+x.n+'” · hari ini\nKeluar hari ini: '+rp(sum(inD(d),'out'))+bw()});save();render();window.scrollTo(0,document.body.scrollHeight)}
 function chat(){
  const m=S.chat.length?S.chat:[{r:'a',t:'Hai! Tulis transaksimu seperti ngobrol: “makan siang 25rb, parkir 3rb” atau “gajian 5jt”. Aku catat otomatis. Kamu juga bisa tanya: “saldo”, “hari ini”, “bulan ini”.'}],f=freq().slice(0,6);
  return `<h1>Catat AI</h1><div class='sub'>Ketik bebas, langsung tercatat.</div>${f.length?`<div class='cap' style='margin:12px 4px 2px'>Sering dicatat</div><div class='chips'>${f.map((x,i)=>`<span class='chip' data-i='${i}' onclick='qa(+this.dataset.i)'>${EM[x.c]||'📦'} ${esc(x.n)} · ${kf(x.a)} <small style='text-transform:none;opacity:.6'>×${x.cnt}</small></span>`).join('')}</div>`:''}<div id='msgs'>${m.slice(-60).map(x=>`<div class='b ${x.r}'>${esc(x.t).replace(/\n/g,'<br>')}</div>`).join('')}${f.length?`<div class='b a'>💡 Pola kebiasaanmu: ${f.slice(0,3).map(x=>esc(x.n)+' ('+rp(x.a)+')').join(', ')}. Tap pintasan di atas, atau ketik namanya saja tanpa nominal — nominal biasanya terisi otomatis.</div>`:''}</div>`}
@@ -1576,9 +1580,20 @@ function quickRecords(){
  const f=freq().slice(0,6);if(!f.length)return'';
  return `<div class='cap'>Sering dicatat</div><div class='chips' role='group' aria-label='Pintasan catatan cepat'>${f.map((x,i)=>`<button type='button' class='chip' data-i='${i}' onclick='qa(+this.dataset.i)' aria-label='Catat ${esc(x.n)}, ${kf(x.a)}'>${EM[x.c]||'📦'} ${esc(x.n)} · ${kf(x.a)} <small style='text-transform:none;opacity:.6'>×${x.cnt}</small></button>`).join('')}</div>`
 }
+function toggleQuickRecords(){
+ const hasRecords=freq().length>0;
+ if(tab!=='chat'||!hasRecords)return;
+ quickRecordsOpen=!quickRecordsOpen;
+ const quick=$('#quick-record'),toggle=$('#quick-toggle');
+ quick.innerHTML=quickRecordsOpen?quickRecords():'';
+ quick.style.display=quickRecordsOpen?'block':'none';
+ toggle.setAttribute('aria-expanded',String(quickRecordsOpen));
+ toggle.setAttribute('aria-label',quickRecordsOpen?'Tutup catatan cepat':'Buka catatan cepat');
+ document.documentElement.classList.toggle('has-quick-record',quickRecordsOpen)
+}
 function chat(){
  const h=new Date().getHours(),gr=h<11?'pagi':h<15?'siang':h<18?'sore':'malam',m=S.chat.length?S.chat:[{r:'a',t:'Ketik, mis. “makan siang 25rb” atau “gajian 5jt”. Tanya juga: “saldo”, “bulan ini”.'}],f=freq().slice(0,6);
- return `<div class='chat-sticky'><div class='chat-sticky-head'>${bb()}<div class='gh'>Selamat ${gr}, ${nm()}! ✌️</div></div>${gcards(ins())}</div><div id='msgs'>${m.slice(-60).map(x=>`<div class='b ${x.r}'>${esc(x.t).replace(/\n/g,'<br>')}</div>`).join('')}${f.length?`<div class='b a'>💡 Pola kebiasaanmu: ${f.slice(0,3).map(x=>esc(x.n)+' ('+rp(x.a)+')').join(', ')}. Gunakan pintasan catatan cepat di atas kolom input, atau ketik namanya tanpa nominal agar nominal terakhir terisi otomatis.</div>`:''}</div>`}
+ return `<div class='chat-sticky'><div class='chat-sticky-head'>${bb()}<div class='gh'>Selamat ${gr}, ${nm()}! ✌️</div></div>${gcards(ins())}</div><div id='msgs'>${m.slice(-60).map(x=>`<div class='b ${x.r}'>${esc(x.t).replace(/\n/g,'<br>')}</div>`).join('')}${f.length?`<div class='b a'>💡 Pola kebiasaanmu: ${f.slice(0,3).map(x=>esc(x.n)+' ('+rp(x.a)+')').join(', ')}. Gunakan tombol catatan cepat di kolom input, atau ketik namanya tanpa nominal agar nominal terakhir terisi otomatis.</div>`:''}</div>`}
 function emph(){
  const v=$('#v');if(!v||!v.ownerDocument||!document.createTreeWalker)return;
  const w=document.createTreeWalker(v,NodeFilter.SHOW_TEXT),L=[];let n;
