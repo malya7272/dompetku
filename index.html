@@ -477,12 +477,12 @@ body::after{background:var(--bg);background:color-mix(in srgb,var(--bg) 94%,tran
 .gbtn:disabled{opacity:.72;cursor:wait}
 @media (max-width:899px){
 html,body{width:100%;min-width:0}
+html{overflow-x:clip}
 main,#v{width:100%;min-width:0}
 .shd{position:sticky;top:0;z-index:8;padding-top:max(8px,env(safe-area-inset-top,0px))}
 #tb{position:fixed;z-index:9;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px))}
 #v .card,#v .row{min-width:0}
 }
-
 /* Mobile layout hardening: keep the app readable on narrow phones. */
 @media (max-width:899px){
   html,body{width:100%;min-width:0;overflow-x:clip}
@@ -533,6 +533,32 @@ main,#v{width:100%;min-width:0}
   #tb .tab.ctr svg{width:23px;height:23px}
   #tg{width:34px;height:34px;right:12px}
   .pane{padding-left:12px;padding-right:12px}
+@media (min-width:900px){
+ main{width:100%;max-width:1760px;padding:32px 48px 64px 144px}
+ main#v[data-t]:not([data-t=home]){max-width:1760px}
+ #v[data-t=home]{column-gap:24px}
+ #v[data-t=chat]{max-width:960px}
+ #v[data-t=ang],#v[data-t=set]{max-width:1040px;margin-left:auto;margin-right:auto}
+ #v[data-t=tgt],#v[data-t=hut],#v[data-t=dmp],#v[data-t=rcn],#v[data-t=prf]{
+  display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;row-gap:0;align-items:start
+ }
+ #v[data-t=tgt]>*,#v[data-t=hut]>*,#v[data-t=dmp]>*,#v[data-t=rcn]>*,#v[data-t=prf]>*{min-width:0;margin-left:0;margin-right:0}
+ #v[data-t=tgt]>.shd,#v[data-t=hut]>.shd,#v[data-t=dmp]>.shd,#v[data-t=rcn]>.shd,#v[data-t=prf]>.shd{grid-column:1/-1}
+ #v[data-t=tgt]>.card,#v[data-t=hut]>.card{grid-column:span 6}
+ #v[data-t=dmp]>.dh,#v[data-t=dmp]>.dc{grid-column:span 6}
+ #v[data-t=dmp]>.dl2{grid-column:1/-1}
+ #v[data-t=dmp]>.dw{grid-column:span 6}
+ #v[data-t=dmp]>.card:not(.dh):not(.dc):not(.dw){grid-column:span 6}
+ #v[data-t=rcn]>.seg{grid-column:span 6}
+ #v[data-t=rcn]>.card{grid-column:span 6}
+ #v[data-t=rcn]>.card:nth-child(4){grid-column:1/-1}
+ #v[data-t=rcn]>.card:nth-child(2):last-child{grid-column:1/-1}
+ #v[data-t=prf]>.card{grid-column:span 6}
+ #v[data-t=prf]>.card:nth-child(2){grid-column:span 5}
+}
+@media (min-width:1400px){
+ #v[data-t=tgt]>.card,#v[data-t=hut]>.card{grid-column:span 4}
+ #v[data-t=dmp]>.dw{grid-column:span 4}
 }
 </style>
 </head>
@@ -548,6 +574,7 @@ main,#v{width:100%;min-width:0}
 let KEY='dompetku_v1';let S={tx:[],chat:[]};
 try{S=JSON.parse(localStorage.getItem(KEY))||S}catch(e){}
 S.tx=S.tx||[];S.chat=S.chat||[];
+const chatId=()=>Date.now()+'-'+Math.random().toString(36).slice(2,9);
 const save=(r)=>{if(r!==1)S.ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(r!==1)cloud()};
 const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -591,7 +618,7 @@ function ai(v){
  if(/bulan ini|laporan/.test(l)){const a=inM(today().slice(0,7));return'Bulan ini: masuk '+rp(sum(a,'in'))+', keluar '+rp(sum(a,'out'))+'.'}
  {const r=ask(l);if(r)return r}return'Nominal tidak ditemukan. Coba “makan siang 25rb”.';
 }
-function send(){const i=$('#ci'),v=i.value.trim();if(!v)return;i.value='';S.chat.push({r:'u',t:v});save();render();const m=$('#msgs');if(m)m.insertAdjacentHTML('beforeend','<div class="b a typ"><i></i><i></i><i></i></div>');window.scrollTo(0,document.body.scrollHeight);setTimeout(()=>{S.chat.push({r:'a',t:ai(v)});save();render();window.scrollTo(0,document.body.scrollHeight)},700)}
+function send(){const i=$('#ci'),v=i.value.trim();if(!v)return;i.value='';S.chat.push({id:chatId(),r:'u',t:v});save();render();const m=$('#msgs');if(m)m.insertAdjacentHTML('beforeend','<div class="b a typ"><i></i><i></i><i></i></div>');window.scrollTo(0,document.body.scrollHeight);setTimeout(()=>{S.chat.push({id:chatId(),r:'a',t:ai(v)});save();render();window.scrollTo(0,document.body.scrollHeight)},700)}
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ci')send()});
 let tab='home',rm='d',rd=today(),rmo=today().slice(0,7),sh={};
 const row=x=>`<div class="li row" onclick="edit(${x.id})"><div class="ic">${EM[x.c]||'📦'}</div><div class="grow"><div class="ell">${esc(x.n)}</div><small style='text-transform:none;letter-spacing:0;font-size:11px'>${x.c} · ${x.w||wl()[0]}</small></div><b class="${x.t}">${x.t==='in'?'+':'−'}${rp(x.a)}</b><button class="dl" onclick="del(${x.id},event)">Hapus</button></div>`;
@@ -705,7 +732,7 @@ function kal(){
  let g='';
  for(let i=0;i<42;i++){const d=new Date(y,mo-1,1-off+i),s=ymd(d),x=inD(s),v=sum(x,'in')-sum(x,'out');
   g+=`<div class='cc${d.getMonth()===mo-1?'':' o'}${d.getDay()===0?' su':''}${s===cd?' sel':''}' data-d='${s}' onclick='pick(this.dataset.d)'><span class='${s===today()?'td':''}'>${d.getDate()}</span>${x.length?`<em class='am ${v<0?'out':'in'}'>${v<0?'−':'+'}${kf(v)}</em>`:''}</div>`}
- return `<h1>${bb()}Kalender</h1>
+ return `<h1>Kalender</h1>
  <div class='card'><div class='ch'><div class='cic'><svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'><rect x='4' y='5' width='16' height='15' rx='2.5'/><path d='M4 10h16M9 3v4M15 3v4'/></svg></div><div class='grow'><b>${fmtM(cm)}</b></div><button class='pill' onclick='kn(0)'>Hari ini</button><button class='pill sq' onclick='kn(-1)'>‹</button><button class='pill sq' onclick='kn(1)'>›</button></div>
  <div class='wk'>${['SEN','SEL','RAB','KAM','JUM','SAB','MIN'].map(w=>`<span>${w}</span>`).join('')}</div><div class='cg'>${g}</div></div>
  <div class='card'><div class='row'><div class='cic' style='background:var(--blue);color:#fff'>✨</div><div class='grow'><b>Ringkasan AI</b></div><button class='pill' style='background:var(--blue);color:#fff;border:0' onclick='kg()'>Buat ringkasan</button></div>
@@ -754,7 +781,7 @@ const pg=(t,s,b)=>`<div class='row' style='margin:4px 0 8px'><button class='pill
 const inP=(p,o)=>{const t=today();if(p==='a')return o?()=>false:()=>true;if(p==='m'){const m=addM(t.slice(0,7),-o);return x=>x.d.slice(0,7)===m}if(p==='y'){const y=String(+t.slice(0,4)-o);return x=>x.d.slice(0,4)===y}const s=addDays(t,-((new Date(t+'T00:00:00').getDay()+6)%7)-7*o),e=addDays(s,6);return x=>x.d>=s&&x.d<=e};
 const fmL=d=>new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
 function fi(el){const v=+el.value.replace(/\D/g,'');el.value=v?fm(v):''}
-function ana(){const T=[['k','Kondisi'],['p','Pola'],['f','Proyeksi'],['r','Laporan']];return `<h1>${bb()}Analisis</h1><div class='seg'>${T.map(([k,l])=>`<b class='${an===k?'on':''}' data-k='${k}' onclick='an=this.dataset.k;render()'>${l}</b>`).join('')}</div>${an==='k'?kondisi():an==='p'?pola():an==='f'?fc().split('</h1>')[1]+skn():rpt()}`}
+function ana(){const T=[['k','Kondisi'],['p','Pola'],['f','Proyeksi'],['r','Laporan']];return `<h1>Analisis</h1><div class='seg'>${T.map(([k,l])=>`<b class='${an===k?'on':''}' data-k='${k}' onclick='an=this.dataset.k;render()'>${l}</b>`).join('')}</div>${an==='k'?kondisi():an==='p'?pola():an==='f'?fc().split('</h1>')[1]+skn():rpt()}`}
 function pola(){
  const M=today().slice(0,7),a=inM(M).filter(x=>x.t==='out'),T=sum(a,'out'),c={};a.forEach(x=>c[x.c]=(c[x.c]||0)+x.a);
  const base=k=>{const v=[1,2,3].map(i=>sum(inM(addM(M,-i)).filter(x=>x.c===k),'out')).filter(Boolean);return v.length?v.reduce((s,x)=>s+x,0)/v.length:0};
@@ -812,8 +839,13 @@ function pp(k,i){const f=k==='g'?'gl':'db',v=+$('#pp'+i).value.replace(/\D/g,'')
 function px(k,i){const f=k==='g'?'gl':'db';S[f]=S[f].filter(y=>y.id!==i);save();render()}
 let fa=null,fd=null,fu=null,fs='off',unsub=null,ctm=0,fbInitPromise=null,cloudState='off',authReady=false;
 const ld=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
-const plo=()=>{const o={...S};delete o.fb;delete o.th;delete o.hide;delete o.chat;delete o.gs;delete o.pf;delete o.ses;return JSON.stringify(o)};
-const mg=(a,b)=>{const u=(x,y)=>{const m=new Map();[...(x||[]),...(y||[])].forEach(i=>m.set(i.id,i));return[...m.values()]};return{...a,...b,tx:u(a.tx,b.tx),gl:u(a.gl,b.gl),db:u(a.db,b.db),wl:[...new Set([...(a.wl||[]),...(b.wl||[])])],bud:{...a.bud,...b.bud}}};
+const plo=()=>{const o={...S};['fb','pf','ses','sy'].forEach(k=>delete o[k]);return JSON.stringify(o)};
+const mg=(a,b)=>{
+ const remoteNewer=(a.ts||0)>=(b.ts||0),older=remoteNewer?b:a,newer=remoteNewer?a:b;
+ const union=(x,y)=>{const m=new Map();[...(x||[]),...(y||[])].forEach(i=>m.set(i.id,i));return[...m.values()]};
+ const chats=(x,y)=>{const m=new Map();[x||[],y||[]].forEach(list=>{const seen=new Map();list.forEach(i=>{const base=`legacy:${i.r}:${i.t}`,n=seen.get(base)||0;seen.set(base,n+1);m.set(i.id||base+':'+n,i)})});return[...m.values()]};
+ return{...older,...newer,tx:union(older.tx,newer.tx),gl:union(older.gl,newer.gl),db:union(older.db,newer.db),chat:chats(older.chat,newer.chat),wl:[...new Set([...(a.wl||[]),...(b.wl||[])])],bud:{...(older.bud||{}),...(newer.bud||{})},gs:newer.gs??older.gs,th:newer.th??older.th,hide:newer.hide??older.hide};
+};
 function cloud(n){
  if(!fu||!fd||isDemo)return;
  const uid=fu.uid,payload=plo();
@@ -844,12 +876,14 @@ function sub(){
  if(unsub)unsub();
  cloudState='syncing';
  unsub=fd.doc('users/'+fu.uid+'/app/state').onSnapshot(d=>{
-  const o=d.exists&&d.data().p?JSON.parse(d.data().p):null,k={fb:S.fb,th:S.th,hide:S.hide,chat:S.chat,gs:S.gs,pf:S.pf,ses:S.ses};
-  if(S.sy!==fu.uid){S=o?{...mg(o,S),...k}:S;S.sy=fu.uid;S.ts=Date.now();save(1);cloud(1);render();return}
+  const o=d.exists&&d.data().p?JSON.parse(d.data().p):null;
+  if(S.sy!==fu.uid){const merged=o?mg(o,S):S;S={...merged,fb:S.fb,pf:S.pf,ses:S.ses,sy:fu.uid,ts:Date.now()};save(1);cloud(1);render();return}
   if(!o){cloud(1);return}
   cloudState='synced';
   if(tab==='prf'||tab==='set')render();
-  if((o.ts||0)>(S.ts||0)){S={...o,...k,sy:fu.uid};save(1);render()}else if((S.ts||0)>(o.ts||0))cloud(1)
+  if((o.ts||0)>(S.ts||0)){S={...mg(o,S),fb:S.fb,pf:S.pf,ses:S.ses,sy:fu.uid,ts:o.ts};save(1);render()}
+  else if((S.ts||0)>(o.ts||0))cloud(1)
+  else if(plo()!==d.data().p){S={...mg(o,S),fb:S.fb,pf:S.pf,ses:S.ses,sy:fu.uid,ts:Date.now()};save(1);cloud(1);render()}
  },()=>{fs='err';cloudState='err';if(tab==='set'||tab==='prf')render()})
 }
 function fbSave(){const t=$('#fbc').value,o={};for(const m of t.matchAll(/(\w+)\s*:\s*["']([^"']+)["']/g))o[m[1]]=m[2];if(!o.apiKey||!o.projectId){$('#fbc').value='';$('#fbc').placeholder='Konfigurasi tidak valid. Tempel seluruh blok firebaseConfig.';return}S.fb=o;save();fbInit().catch(()=>{});render()}
@@ -870,7 +904,7 @@ function freq(){
  S.tx.forEach(x=>{const k=kk(x),o=m[k]||(m[k]={k,n:x.n,t:x.t,c:x.c,w:x.w,cnt:0,am:{},last:'',la:0});o.cnt++;o.am[x.a]=(o.am[x.a]||0)+1;if(x.d>=o.last){o.last=x.d;o.c=x.c;o.w=x.w;o.n=x.n;o.la=x.a}});
  return Object.values(m).filter(o=>o.cnt>=2).map(o=>{const e=Object.entries(o.am).sort((p,r)=>r[1]-p[1]);o.a=e[1]&&e[1][1]===e[0][1]?o.la:+e[0][0];o.sc=o.cnt*(1+1/(1+(t0-new Date(o.last+'T00:00:00'))/864e5/14));return o}).sort((p,r)=>r.sc-p.sc)}
 function fmatch(s){const l=s.toLowerCase().replace(/\b(kemarin lusa|kemarin dulu|kemarin|hari ini|tanggal|tgl)\b\s*\d*/g,'').trim();if(l.length<3)return null;return freq().find(x=>{const n=x.n.toLowerCase();return l.includes(n)||n.includes(l)})||null}
-function qa(i){const x=freq()[i];if(!x)return;const d=today();S.tx.push({id:Date.now(),t:x.t,a:x.a,c:x.c,n:x.n,d,w:x.w||wl()[0]});S.chat.push({r:'u',t:x.n+' '+kf(x.a)},{r:'a',t:'✅ '+(x.t==='in'?'Pemasukan ':'Pengeluaran ')+rp(x.a)+' · '+x.c+'\n“'+x.n+'” · hari ini\nKeluar hari ini: '+rp(sum(inD(d),'out'))+bw()});save();render();window.scrollTo(0,document.body.scrollHeight)}
+function qa(i){const x=freq()[i];if(!x)return;const d=today();S.tx.push({id:Date.now(),t:x.t,a:x.a,c:x.c,n:x.n,d,w:x.w||wl()[0]});S.chat.push({id:chatId(),r:'u',t:x.n+' '+kf(x.a)},{id:chatId(),r:'a',t:'✅ '+(x.t==='in'?'Pemasukan ':'Pengeluaran ')+rp(x.a)+' · '+x.c+'\n“'+x.n+'” · hari ini\nKeluar hari ini: '+rp(sum(inD(d),'out'))+bw()});save();render();window.scrollTo(0,document.body.scrollHeight)}
 function chat(){
  const m=S.chat.length?S.chat:[{r:'a',t:'Hai! Tulis transaksimu seperti ngobrol: “makan siang 25rb, parkir 3rb” atau “gajian 5jt”. Aku catat otomatis. Kamu juga bisa tanya: “saldo”, “hari ini”, “bulan ini”.'}],f=freq().slice(0,6);
  return `<h1>Catat AI</h1><div class='sub'>Ketik bebas, langsung tercatat.</div>${f.length?`<div class='cap' style='margin:12px 4px 2px'>Sering dicatat</div><div class='chips'>${f.map((x,i)=>`<span class='chip' data-i='${i}' onclick='qa(+this.dataset.i)'>${EM[x.c]||'📦'} ${esc(x.n)} · ${kf(x.a)} <small style='text-transform:none;opacity:.6'>×${x.cnt}</small></span>`).join('')}</div>`:''}<div id='msgs'>${m.slice(-60).map(x=>`<div class='b ${x.r}'>${esc(x.t).replace(/\n/g,'<br>')}</div>`).join('')}${f.length?`<div class='b a'>💡 Pola kebiasaanmu: ${f.slice(0,3).map(x=>esc(x.n)+' ('+rp(x.a)+')').join(', ')}. Tap pintasan di atas, atau ketik namanya saja tanpa nominal — nominal biasanya terisi otomatis.</div>`:''}</div>`}
@@ -1007,7 +1041,7 @@ function rcn(){
  const s1=`<div class='seg'>${[['hemat','Hemat'],['normal','Normal'],['worst','Terburuk']].map(([k,l])=>`<b class='${rsc===k?'on':''}' data-k='${k}' onclick='rsc=this.dataset.k;render()'>${l}</b>`).join('')}</div>`,s2=`<div class='seg'>${[6,12,24].map(k=>`<b class='${rh===k?'on':''}' data-k='${k}' onclick='rh=+this.dataset.k;render()'>${k} bln</b>`).join('')}</div>`;
  const W=320,H0=130,L0=36,R0=8,T0=8,B0=18,all=Object.values(sc).flatMap(z=>[z.b0,...z.rows.map(r=>r.bal)]),mn=Math.min(0,...all),mx=Math.max(1,...all),X=i=>L0+i/rh*(W-L0-R0),Y=v=>T0+(1-(v-mn)/(mx-mn||1))*(H0-T0-B0);
  const ch=`<svg viewBox='0 0 ${W} ${H0}' width='100%'><line class='gl' x1='${L0}' x2='${W-R0}' y1='${Y(0)}' y2='${Y(0)}' style='stroke:var(--red)'/><text class='tx' x='${L0-4}' y='${Y(0)+3}' text-anchor='end'>0</text><text class='tx' x='${L0-4}' y='${Y(mx)+3}' text-anchor='end'>${kf(Math.round(mx))}</text>${mn<0?`<text class='tx' x='${L0-4}' y='${Y(mn)+3}' text-anchor='end'>-${kf(Math.round(-mn))}</text>`:''}${Object.keys(sc).map(k=>`<polyline class='ln' style='stroke:${C[k]};${k===rsc?'':'opacity:.35'}' points='${[sc[k].b0,...sc[k].rows.map(r=>r.bal)].map((v,i)=>X(i)+','+Y(v)).join(' ')}'/>`).join('')}<text class='tx' x='${X(0)}' y='${H0-4}'>Sekarang</text><text class='tx' x='${X(rh)}' y='${H0-4}' text-anchor='end'>+${rh} bln</text></svg><div class='row' style='gap:12px;font-size:11px'>${Object.keys(sc).map(k=>`<span style='color:${C[k]}'>● ${L[k]}</span>`).join('')}</div>`;
- const cell=v=>`<span style='text-align:right'>${v>0?kf(Math.round(v)):'–'}</span>`,tbl=`<div style='display:grid;grid-template-columns:1.1fr repeat(3,1fr) 1.2fr;gap:5px 4px;font-size:12px;margin-top:8px'><small>Bulan</small><small style='text-align:right'>Belanja</small><small style='text-align:right'>Cicilan</small><small style='text-align:right'>Tabungan</small><small style='text-align:right'>Saldo</small>${x.rows.slice(0,6).map(r=>`<span>${fmb(r.mo)}</span>${cell(r.v)}${cell(r.cic)}${cell(r.sv)}<b style='text-align:right;color:${r.bal<0?'var(--red)':'inherit'}'>${r.bal<0?'−':''}${kf(Math.round(Math.abs(r.bal)))}</b>`).join('')}</div>${rh>6?`<div class='sub' style='font-size:11px;margin-top:6px'>6 bulan pertama.</div>`:''}`;
+ const cell=v=>`<span style='text-align:right'>${v>0?kf(Math.round(v)):'–'}</span>`,tbl=`<div class='plan-table-scroll'><div class='plan-table' style='display:grid;gap:5px 4px;font-size:12px;margin-top:8px'><small>Bulan</small><small style='text-align:right'>Belanja</small><small style='text-align:right'>Cicilan</small><small style='text-align:right'>Tabungan</small><small style='text-align:right'>Saldo</small>${x.rows.slice(0,6).map(r=>`<span>${fmb(r.mo)}</span>${cell(r.v)}${cell(r.cic)}${cell(r.sv)}<b style='text-align:right;color:${r.bal<0?'var(--red)':'inherit'}'>${r.bal<0?'−':''}${kf(Math.round(Math.abs(r.bal)))}</b>`).join('')}</div></div>${rh>6?`<div class='sub' style='font-size:11px;margin-top:6px'>6 bulan pertama.</div>`:''}`;
  const dc=db.map((d,j)=>{const rm=Math.max(0,d.t-d.p),k=d.m>0?Math.ceil(Math.max(0,rm-P.w[j])/d.m):null,pc=Math.min(100,Math.round(d.p/d.t*100));return `<div class='li'><div class='row sp'><b>${esc(d.n)}</b><span class='sub'>${pc}%</span></div><div class='pb'><i style='width:${pc}%'></i></div><div class='sub' style='font-size:12px;margin-top:5px'>${d.m>0?`Cicilan ${rp(d.m)}/bln · tgl ${d.dd||25} · sisa ${rp(rm)} · ${rm<=0?'lunas':k<=0?'lunas bulan ini':'lunas ±'+fmb(addM(P.pm,k-1))}`:`Sisa ${rp(rm)} · isi cicilan per bulan di menu Hutang agar masuk proyeksi`}</div></div>`}).join('')||`<div class='sub' style='margin-top:6px'>Belum ada cicilan.</div>`;
  const tg=gl.map(g=>{const rm=Math.max(0,g.t-g.p),pc=Math.min(100,Math.round(g.p/g.t*100)),mo=g.dl?Math.max(1,mdf(P.pm,g.dl)+1):0,need=mo?Math.ceil(rm/mo):0,eta=g.al>0?addM(P.pm,Math.ceil(rm/g.al)-1):null;let st;if(rm<=0)st=`<span class='in'>✅ Tercapai</span>`;else if(g.al>0)st=g.dl&&eta>g.dl?`<span class='out'>Perlu naik ke ${rp(need)}/bln agar sesuai tenggat</span>`:`<span class='in'>Selesai ±${fmb(eta)}</span>`;else st=g.dl?`Perlu ${rp(need)}/bln hingga ${fmb(g.dl)}`:'Atur alokasi per bulan di menu Target';return `<div class='li'><div class='row sp'><b>${esc(g.n)}</b><span class='sub'>${pc}%</span></div><div class='pb'><i style='width:${pc}%'></i></div><div class='sub' style='font-size:12px;margin-top:5px'>Sisa ${rp(rm)} · ${g.al?'alokasi '+rp(g.al)+'/bln':'belum ada alokasi'} · ${st}</div></div>`}).join('')||`<div class='sub' style='margin-top:6px'>Belum ada target.</div>`;
  const nt=[],w2=sc.worst;
@@ -1046,22 +1080,22 @@ async function gsBackup(auto){
  const g=S.gs;if(!g||!g.url){if(!auto)gsMsg('Isi URL Web App dulu.');return}
  if(gsBusy)return;gsBusy=1;gsMsg('Mengirim backup\u2026');
  try{const r=await gsCall('backup',gsPayload());
-  if(r&&r.ok){S.gs.last=new Date().toISOString();S.gs.day=today();save(1);gsMsg('Backup berhasil \u00b7 '+(r.tx!=null?r.tx+' transaksi \u00b7 ':'')+new Date().toLocaleString('id-ID'))}
+  if(r&&r.ok){S.gs.last=new Date().toISOString();S.gs.day=today();save();cloud(1);gsMsg('Backup berhasil \u00b7 '+(r.tx!=null?r.tx+' transaksi \u00b7 ':'')+new Date().toLocaleString('id-ID'))}
   else if(r)gsMsg('Gagal: '+(r.error||'tidak diketahui'))}
  finally{gsBusy=0}}
 async function gsSave(){const u=($('#gsu').value||'').trim(),t=($('#gst').value||'').trim();if(!u){gsMsg('Isi URL Web App dulu.');return}
- S.gs={...(S.gs||{}),url:u,tok:t};save(1);gsMsg('Menguji koneksi\u2026');const r=await gsCall('ping');
+ S.gs={...(S.gs||{}),url:u,tok:t};save();cloud(1);gsMsg('Menguji koneksi\u2026');const r=await gsCall('ping');
  if(r)gsMsg(r.ok?'Terhubung \u2713'+(r.last?' \u00b7 backup terakhir di sheet: '+new Date(r.last).toLocaleString('id-ID'):' \u00b7 belum ada backup'):'Gagal: '+(r.error||'tidak diketahui'))}
 async function gsRestore(){gsMsg('Mengambil backup terakhir\u2026');const r=await gsCall('restore');
  if(!r)return;if(!r.ok||!r.data){gsMsg('Gagal: '+(r.error||'belum ada backup'));return}
  const k={fb:S.fb,th:S.th,hide:S.hide,chat:S.chat,gs:S.gs,sy:S.sy,pf:S.pf,ses:S.ses};S={...r.data,...k};S.tx=S.tx||[];S.chat=S.chat||[];save();gsm='Data dipulihkan dari backup '+new Date(r.at).toLocaleString('id-ID');tab='home';render(1)}
 function gsRst(b){if(!b.dataset.s){b.dataset.s=1;b.textContent='Tap lagi: timpa data lokal';setTimeout(()=>{b.dataset.s='';b.textContent='Pulihkan'},3500);return}gsRestore()}
-function gsAutoSet(v){S.gs=S.gs||{};S.gs.auto=v;save(1)}
+function gsAutoSet(v){S.gs=S.gs||{};S.gs.auto=v;save();cloud(1)}
 function gsCopy(){const t=$('#gsc');if(t&&t.select)t.select();try{navigator.clipboard.writeText(GS_CODE)}catch(e){}gsMsg('Kode disalin. Tempel di Extensions \u2192 Apps Script.')}
 function gsAuto(){const g=S.gs;if(!g||!g.auto||!g.url||gsBusy||isDemo||g.day===today()||navigator.onLine===false)return;gsBackup(1)}
 function gsUI(){
  const g=S.gs||{};
- return `<div class='card'><p class='sub'>Cadangan ke Google Sheets lewat Apps Script milikmu. Data tersimpan di spreadsheet-mu sendiri.</p><input id='gsu' class='fld' placeholder='URL Web App (\u2026/exec)' value="${esc(g.url||'')}"><input id='gst' class='fld' type='password' placeholder='Kode rahasia (sama dengan di script)' value="${esc(g.tok||'')}"><button class='btn' onclick='gsSave()'>Simpan &amp; uji koneksi</button><div class='g2'><button class='btn' onclick='gsBackup()'>Backup sekarang</button><button class='btn' style='background:var(--fill);color:var(--red)' onclick='gsRst(this)'>Pulihkan</button></div><label class='row' style='margin-top:12px'><input type='checkbox' ${g.auto?'checked':''} onchange='gsAutoSet(this.checked)'><span class='sub'>Backup otomatis sekali sehari</span></label><div class='sub' style='margin-top:8px'>${g.last?'Terakhir backup: '+new Date(g.last).toLocaleString('id-ID'):'Belum pernah backup'}</div>${gsm?`<div class='sub' style='margin-top:6px;color:var(--tx)'>${esc(gsm)}</div>`:''}<details style='margin-top:10px'><summary class='sub'>Kode Apps Script (tempel di Extensions \u2192 Apps Script)</summary><textarea id='gsc' class='fld' rows='8' readonly onclick='this.select()'>${esc(GS_CODE)}</textarea><button class='btn' style='background:var(--fill);color:var(--ct)' onclick='gsCopy()'>Salin kode</button></details></div>`}
+ return `<div class='card'><p class='sub'>Cadangan ke Google Sheets lewat Apps Script milikmu. Data tersimpan di spreadsheet-mu sendiri.</p><p class='sub'>URL dan kode rahasia disinkronkan ke perangkat lain lewat Firestore akun Google. Pastikan Firestore Rules membatasi akses per UID.</p><input id='gsu' class='fld' placeholder='URL Web App (\u2026/exec)' value="${esc(g.url||'')}"><input id='gst' class='fld' type='password' placeholder='Kode rahasia (sama dengan di script)' value="${esc(g.tok||'')}"><button class='btn' onclick='gsSave()'>Simpan &amp; uji koneksi</button><div class='g2'><button class='btn' onclick='gsBackup()'>Backup sekarang</button><button class='btn' style='background:var(--fill);color:var(--red)' onclick='gsRst(this)'>Pulihkan</button></div><label class='row' style='margin-top:12px'><input type='checkbox' ${g.auto?'checked':''} onchange='gsAutoSet(this.checked)'><span class='sub'>Backup otomatis sekali sehari</span></label><div class='sub' style='margin-top:8px'>${g.last?'Terakhir backup: '+new Date(g.last).toLocaleString('id-ID'):'Belum pernah backup'}</div>${gsm?`<div class='sub' style='margin-top:6px;color:var(--tx)'>${esc(gsm)}</div>`:''}<details style='margin-top:10px'><summary class='sub'>Kode Apps Script (tempel di Extensions \u2192 Apps Script)</summary><textarea id='gsc' class='fld' rows='8' readonly onclick='this.select()'>${esc(GS_CODE)}</textarea><button class='btn' style='background:var(--fill);color:var(--ct)' onclick='gsCopy()'>Salin kode</button></details></div>`}
 let isDemo=false,gtab='in',gmsg='',gBusy=false;
 const FB_DEFAULT={
  apiKey:'AIzaSyDtN3J2Ol18NWVcwO0QU0B7a1GNVB5h0dw',
@@ -1118,8 +1152,14 @@ function gLogin(){
  if(gBusy)return;
  if(!authReady||!fa){gBusy=true;gmsg='Menyiapkan login Google…';if(tab==='prf')render();else gateRender();fbInit().catch(()=>{});return}
  gBusy=true;gmsg='Membuka Google…';
+ const provider=new firebase.auth.GoogleAuthProvider();
+ if(matchMedia('(max-width:599px)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+  if(tab==='prf')render();else gateRender();
+  fa.signInWithRedirect(provider).catch(e=>{gAuthError(e);if(tab==='prf')render();else gateRender()});
+  return
+ }
  let attempt;
- try{attempt=fa.signInWithPopup(new firebase.auth.GoogleAuthProvider())}
+ try{attempt=fa.signInWithPopup(provider)}
  catch(e){gAuthError(e);if(tab==='prf')render();else gateRender();return}
  if(tab==='prf')render();else gateRender();
  attempt.then(()=>{gBusy=false;gmsg=''}).catch(e=>{gAuthError(e);if(tab==='prf')render();else gateRender()})
@@ -1231,7 +1271,6 @@ function financialAnalytics(date=today()){
   variableDays=new Set(variableTx.map(x=>x.d)).size,activeDays=new Set(actual.map(x=>x.d)).size,
   elapsed=Math.max(1,day),remainingDays=Math.max(0,D-day),
   A=Object.assign({pd:25,inc:0,buf:0,bill:0,hm:20,wr:30},S.as||{}),
-  salaryRecorded=incomes.some(x=>x.c==='Gaji'||/gaji|salary/i.test(x.n||'')),
   payMonth=day<=Math.min(+A.pd||25,dim(M))?M:addM(M,1),
   pay=payMonth+'-'+pad(Math.min(+A.pd||25,dim(payMonth))),
   daysToPay=Math.max(0,Math.round((new Date(pay+'T00:00:00')-new Date(date+'T00:00:00'))/864e5)),
@@ -1242,7 +1281,9 @@ function financialAnalytics(date=today()){
   debtToMonthEnd=cicWin(date,endOfMonth).reduce((n,x)=>n+x,0),
   monthlyIncome=[1,2,3].map(i=>amount(monthTx(addM(M,-i)).filter(x=>x.t==='in'))).filter(Boolean),
   expectedMonthlyIncome=+A.inc||(monthlyIncome.length?monthlyIncome.reduce((n,x)=>n+x,0)/monthlyIncome.length:0),
-  upcomingSalary=payMonth===M&&!salaryRecorded?expectedMonthlyIncome:0,
+  salaryAlreadyReceived=day>=Math.min(+A.pd||25,D)||income>=expectedMonthlyIncome,
+  upcomingSalary=payMonth===M&&!salaryAlreadyReceived?expectedMonthlyIncome:0,
+  effectiveIncome=income+upcomingSalary,
   dailyRate=variableSpend/elapsed,essentialRate=essentialSpend/elapsed,
   currentDaily=new Map();
  variableTx.forEach(x=>currentDaily.set(x.d,(currentDaily.get(x.d)||0)+(+x.a||0)));
@@ -1260,9 +1301,11 @@ function financialAnalytics(date=today()){
   prior=histories.find(x=>x.month===addM(M,-1)),
   monthOverMonth=activeDays>=15&&prior&&prior.spend>0?(spend+dailyRate*remainingDays+billRemaining+debtToMonthEnd-prior.spend)/prior.spend*100:null,
   forecastSpend=spend+dailyRate*remainingDays+billRemaining+debtToMonthEnd,
-  projectedIncome=income+upcomingSalary,
-  savingsRate=forecastSpend>0&&projectedIncome>0?(projectedIncome-forecastSpend)/projectedIncome:null,
-  spendRate=spend>0&&projectedIncome>0?spend/projectedIncome:null,
+  projectedIncome=effectiveIncome,
+  mtdExpenseRatio=effectiveIncome>0?spend/effectiveIncome:null,
+  projectedExpenseRatio=effectiveIncome>0?forecastSpend/effectiveIncome:null,
+  savingsRate=effectiveIncome>0?(effectiveIncome-forecastSpend)/effectiveIncome:null,
+  spendRate=mtdExpenseRatio,
   projectedEnd=b0+upcomingSalary-dailyRate*remainingDays-billRemaining-debtToMonthEnd,
   budget=S.bud||{},budgetTotal=Object.values(budget).reduce((n,x)=>n+(+x||0),0),
   byCategory=categorySpend(actual),
@@ -1283,7 +1326,7 @@ function financialAnalytics(date=today()){
   scenarios[k]={rate,end,rw:runway,zero:Number.isFinite(runway)?addDays(date,Math.floor(runway)):null,cls:state[0],lb:state[1],after:end+upcomingSalary}
  });
  return{date,M,D,day,remainingDays,actual,spend,variableSpend,essentialSpend,variableDays,activeDays,dailyRate,essentialRate,p90,n:recentDays.size,
-  income,upcomingSalary,expectedMonthlyIncome,projectedIncome,spendRate,savingsRate,forecastSpend,projectedEnd,b0,A,pay,payMonth,daysToPay,
+  income,upcomingSalary,expectedMonthlyIncome,salaryAlreadyReceived,effectiveIncome,projectedIncome,mtdExpenseRatio,projectedExpenseRatio,spendRate,savingsRate,forecastSpend,projectedEnd,b0,A,pay,payMonth,daysToPay,
   billRemaining,fixedToPayday,debtToPay,debtToMonthEnd,remainingBillsToMonthEnd,scenarios,hist,histories,histVariablePerDay,trend,monthOverMonth,
   budgetTotal,budgetedSpend,unbudgetedSpend,budgetedUtilization,totalBudgetUtilization,budgetCoverage,unbudgetedShare,byCategory,
   safe:daysToPay>0?Math.max(0,(b0-fixedToPayday-(+A.buf||0))/daysToPay):0};
@@ -1292,6 +1335,7 @@ function fcst(){
  const a=financialAnalytics();
  return{E:a.spend,I:a.income,rate:a.dailyRate,proj:a.forecastSpend,hist:a.hist,end:a.projectedEnd,trend:a.trend,mom:a.monthOverMonth,
   variable:a.variableSpend,essential:a.essentialSpend,essentialRate:a.essentialRate,savingsRate:a.savingsRate,spendRate:a.spendRate,
+  mtdExpenseRatio:a.mtdExpenseRatio,projectedExpenseRatio:a.projectedExpenseRatio,
   budgetedUtilization:a.budgetedUtilization,totalBudgetUtilization:a.totalBudgetUtilization,budgetCoverage:a.budgetCoverage,
   unbudgetedSpend:a.unbudgetedSpend,unbudgetedShare:a.unbudgetedShare};
 }
@@ -1311,7 +1355,7 @@ function hl(){
   lb=normal.end<0?['Waspada likuiditas','#FF9F0A','255,159,10']:sc>=70?['Sehat','var(--green)','52,199,89']:sc>=45?['Perlu perhatian','#FF9F0A','255,159,10']:['Risiko tinggi','var(--red)','255,59,48'];
  return{sc,lb,sr:a.savingsRate,spendRate:a.spendRate,f,s,bp,parts:[
   ['Likuiditas sampai gajian',p1,40,s.days?`Normal: sisa ${rp(normal.end)} · Terburuk: sisa ${rp(worst.end)}`:'Hari ini gajian'],
-  ['Rasio tabungan proyeksi',p2,30,a.savingsRate===null?'Belum ada pemasukan':`Tabungan ${pctFmt(a.savingsRate*100)} · pengeluaran MTD ${pctFmt(a.spendRate===null?NaN:a.spendRate*100)} · proyeksi pengeluaran ${pctFmt(a.projectedIncome>0?a.forecastSpend/a.projectedIncome*100:NaN)}`],
+  ['Rasio tabungan proyeksi',p2,30,a.savingsRate===null?'Belum ada pemasukan':`Tabungan ${pctFmt(a.savingsRate*100)} · pengeluaran MTD ${pctFmt(a.mtdExpenseRatio===null?NaN:a.mtdExpenseRatio*100)} · proyeksi pengeluaran ${pctFmt(a.projectedExpenseRatio===null?NaN:a.projectedExpenseRatio*100)}`],
   ['Tren biaya variabel',p3,15,a.trend===null?'Data pembanding belum cukup':`${a.trend>0?'+':''}${pctFmt(a.trend)} vs rata-rata harian`],
   ['Cakupan anggaran',p4,15,bp===null?'Belum diatur':`Total belanja ${pctFmt(bp)} dari plafon · cakupan ${pctFmt(a.budgetCoverage||0)}`]
  ],analytics:a};
@@ -1329,7 +1373,7 @@ function fc(){
  <svg viewBox='0 0 ${W} ${H}' width='100%'><polyline points='${act}' fill='none' stroke='var(--blue)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/><polyline points='${pr}' fill='none' stroke='var(--blue)' stroke-width='2.5' stroke-dasharray='5 5' opacity='.5'/></svg>
  <div class='row sp'><small>Aktual</small><small>Proyeksi</small></div></div>
  <div class='g2'><div class='card sm'><div class='cap'>Biaya variabel per hari</div><b>${rp(a.dailyRate)}</b></div><div class='card sm'><div class='cap'>Biaya esensial per hari</div><b>${rp(a.essentialRate)}</b></div>
- <div class='card sm'><div class='cap'>Rasio pengeluaran MTD</div><b>${pctFmt(a.spendRate===null?NaN:a.spendRate*100)}</b></div><div class='card sm'><div class='cap'>Rasio pengeluaran proyeksi</div><b>${pctFmt(a.projectedIncome>0?a.forecastSpend/a.projectedIncome*100:NaN)}</b></div>
+ <div class='card sm'><div class='cap'>Rasio pengeluaran MTD</div><b>${pctFmt(a.mtdExpenseRatio===null?NaN:a.mtdExpenseRatio*100)}</b></div><div class='card sm'><div class='cap'>Rasio pengeluaran proyeksi</div><b>${pctFmt(a.projectedExpenseRatio===null?NaN:a.projectedExpenseRatio*100)}</b></div>
  <div class='card sm'><div class='cap'>Rasio tabungan proyeksi</div><b>${pctFmt(a.savingsRate===null?NaN:a.savingsRate*100)}</b></div>
  <div class='card sm'><div class='cap'>Saldo akhir bulan · normal</div><b class='${a.projectedEnd<0?'out':'in'}'>${rp(a.projectedEnd)}</b></div><div class='card sm'><div class='cap'>Saldo sebelum gajian · normal</div><b class='${a.scenarios.normal.end<0?'out':'in'}'>${rp(a.scenarios.normal.end)}</b></div></div>
  <div class='card'>${benchmark}${a.trend===null?'':` Tren biaya variabel harian ${a.trend>0?'+':''}${pctFmt(a.trend)} dari baseline.`}</div>
