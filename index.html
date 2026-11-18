@@ -705,16 +705,33 @@ main,#v{width:100%;min-width:0}
 }
 html[data-theme=amber]{
  color-scheme:light;
- --bg:#FFFBF5;--card:#FFF;--tx:#29251F;--sub:#81776B;--line:#EFE3D0;
- --blue:#D97706;--ct:#A65300;--green:#2F855A;--red:#C2413B;--fill:rgba(217,119,6,.10);
- --bar:rgba(255,251,245,.92);--gb:rgba(255,255,255,.72);--gbd:rgba(120,72,18,.14);
- --gi:rgba(217,119,6,.13);--thumb:#FFF;--sh:0 6px 24px rgba(111,68,17,.10);
- --h1:#F59E0B;--h2:#B45309;--cb1:#F59E0B;--cb2:#B45309;--ci:#fff;
- --cs:rgba(180,83,9,.24);
- --bgimg:linear-gradient(180deg,rgba(251,191,36,.18),transparent 42%),radial-gradient(700px 520px at 100% 20%,rgba(255,237,204,.72),transparent 62%);
+ --bg-canvas:#FBF9F5;--bg-surface:#FFFFFF;--bg-subtle:#F5F1E8;--bg-highlight:#FEF4D6;
+ --border-color:#262420;--text-primary:#141413;--text-secondary:#57534E;
+ --accent-primary:#F7B917;--accent-primary-text:#141413;--accent-secondary:#18181B;
+ --bg:var(--bg-canvas);--card:var(--bg-surface);--tx:var(--text-primary);--sub:var(--text-secondary);
+ --line:var(--border-color);--blue:var(--accent-primary);--ct:var(--accent-secondary);
+ --fill:var(--bg-subtle);--bar:var(--bg-canvas);--gb:var(--bg-highlight);--gbd:var(--border-color);
+ --gi:var(--bg-highlight);--thumb:var(--bg-surface);--h1:var(--accent-primary);--h2:var(--accent-primary);
+ --cb1:var(--accent-primary);--cb2:var(--accent-primary);--ci:var(--accent-primary-text);
+ --cs:var(--bg-highlight);--bgimg:none;
 }
 html[data-theme=amber] body{background:var(--bg);color:var(--tx)}
-html[data-theme=amber] .card:not(.hero),html[data-theme=amber] .gc{border-color:var(--gbd)}
+html[data-theme=amber] .card:not(.hero),html[data-theme=amber] .gc{background-color:var(--bg-surface);border-color:var(--border-color)}
+html[data-theme=amber] #v:not(.desktop-home) .card:not(.hero){border-color:var(--border-color)}
+html[data-theme=amber] .fld,html[data-theme=amber] #cmp input,
+html[data-theme=amber] .chip:not(.on),html[data-theme=amber] .hb{background-color:var(--bg-subtle);color:var(--text-primary)}
+html[data-theme=amber] .sub,html[data-theme=amber] small,
+html[data-theme=amber] .cap,html[data-theme=amber] .db-tx-date,
+html[data-theme=amber] .db-income-note{color:var(--text-secondary)}
+html[data-theme=amber] .li,html[data-theme=amber] .db-transaction{border-color:var(--border-color)}
+html[data-theme=amber] .btn,html[data-theme=amber] .chip.on,
+html[data-theme=amber] .fab,html[data-theme=amber] .pill{background-color:var(--accent-primary);color:var(--accent-primary-text)}
+html[data-theme=amber] .tab.on,html[data-theme=amber] [style*="color:var(--blue)"]{color:var(--accent-secondary)}
+html[data-theme=amber] .cc.sel{border-color:var(--accent-primary);background-color:var(--bg-highlight)}
+html[data-theme=amber] .cc.su{background-color:var(--bg-highlight)}
+html[data-theme=amber] .st.wn{background-color:var(--bg-highlight);color:var(--accent-secondary)}
+html[data-theme=amber] .tab.on{color:var(--accent-secondary)}
+html[data-theme=amber] .seg b.on{background-color:var(--accent-primary);color:var(--accent-primary-text)}
 html[data-theme=amber] .desktop-topbar .desktop-wordmark b{color:var(--tx)}
 html[data-theme=amber] .desktop-topbar .desktop-wordmark span,
 html[data-theme=amber] .desktop-search{color:var(--sub)}
@@ -727,35 +744,47 @@ html[data-theme=amber] .desktop-home .db-empty{background:var(--card);border-col
 html[data-theme=amber] .desktop-home .db-card-title,
 html[data-theme=amber] .desktop-home .db-tx-name{color:var(--tx)}
 html[data-theme=amber] .desktop-home .db-wallet{background:linear-gradient(135deg,var(--h1),var(--h2))}
+html[data-theme=amber] .desktop-rail{background-color:var(--accent-secondary);color:var(--bg-surface)}
+html[data-theme=amber] .desktop-nav-btn.active{background-color:var(--accent-primary);color:var(--accent-primary-text)}
+html[data-theme=amber] .desktop-nav-btn:hover,
+html[data-theme=amber] .desktop-rail-bottom button:hover{background-color:var(--bg-highlight);color:var(--accent-secondary)}
+html[data-theme=amber] .desktop-greeting h1 span,
+html[data-theme=amber] .desktop-notice i{color:var(--accent-secondary);background-color:var(--accent-primary)}
+html[data-theme=amber] .desktop-quick{background-color:var(--bg-surface);border-color:var(--border-color)}
+html[data-theme=amber] .desktop-quick-item{color:var(--text-primary)}
+html[data-theme=amber] .desktop-quick-item:hover,
+html[data-theme=amber] .desktop-quick-item i{background-color:var(--bg-subtle)}
+html[data-theme=amber] .db-card-title,
+html[data-theme=amber] .db-tx-name{color:var(--text-primary)}
+html[data-theme=amber] .db-balance-main span,
+html[data-theme=amber] .db-trend,
+html[data-theme=amber] .db-month small,
+html[data-theme=amber] .db-legend span,
+html[data-theme=amber] .db-income-note{color:var(--text-secondary)}
+html[data-theme=amber] .db-month i,
+html[data-theme=amber] .db-gauge .track,
+html[data-theme=amber] .db-income-bar{background-color:var(--bg-subtle);stroke:var(--bg-subtle)}
+html[data-theme=amber] .db-wallet{background-image:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary))}
+html[data-theme=amber] .db-wallet-label,
+html[data-theme=amber] .db-wallet-number,
+html[data-theme=amber] .db-wallet-meta,
+html[data-theme=amber] .db-wallet-bottom small{color:var(--accent-primary-text)}
+html[data-theme=amber] .db-wallet-status{background-color:var(--bg-highlight);color:var(--accent-secondary)}
+html[data-theme=amber] .db-action button{background-color:var(--accent-primary);color:var(--accent-primary-text)}
+html[data-theme=amber] .db-head-more,
+html[data-theme=amber] .db-tx-more,
+html[data-theme=amber] .db-health-more{color:var(--text-secondary)}
+html[data-theme=amber] .db-transaction{border-color:var(--border-color)}
+html[data-theme=amber] .db-tx-icon,
+html[data-theme=amber] .db-income-bar{background-color:var(--bg-subtle)}
 html[data-theme=amber] .desktop-home .db-trend svg path,
 html[data-theme=amber] .desktop-home .db-gauge .value{stroke:var(--blue)}
 html[data-theme=amber] .desktop-home .db-month.current i,
 html[data-theme=amber] .desktop-home .db-legend span:first-child i,
 html[data-theme=amber] .desktop-home .db-income-bar i{background:var(--blue)}
 html[data-theme=amber] .desktop-home .db-gauge .value{fill:none}
-html[data-theme=amber] .desktop-home .db-transaction{border-color:var(--line)}
-html[data-theme=amber] .desktop-home .db-tx-icon,
-html[data-theme=amber] .desktop-home .db-income-bar{background:var(--fill)}
 html[data-theme=amber] body::before{background:var(--bgimg)}
-html[data-theme=amber][data-tab=chat] body::before{background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,237,204,.15) 35%,rgba(245,158,11,.16))}
 html[data-theme=amber] body::after{background:color-mix(in srgb,var(--bg) 94%,transparent)}
-@media (max-width:899px){
- #v>.shd{width:100vw;margin-left:calc(50% - 50vw)!important;margin-right:calc(50% - 50vw)!important;padding-left:clamp(12px,4vw,32px)!important;padding-right:clamp(12px,4vw,32px)!important}
-}
-@media (max-width:380px){
- #v>.shd{padding-left:12px!important;padding-right:12px!important}
-}
-@media (min-width:381px) and (max-width:599px){
- #v>.shd{padding-left:clamp(12px,4vw,18px)!important;padding-right:clamp(12px,4vw,18px)!important}
-}
-@media (min-width:600px) and (max-width:899px){
- #v>.shd{padding-left:clamp(16px,4vw,32px)!important;padding-right:clamp(16px,4vw,32px)!important}
-}
-@media (min-width:900px){
- #v>.shd{background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-}
-.theme-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
-.theme-options b{padding:8px 2px;font-size:12px}
 </style>
 </head>
 <body>
@@ -978,21 +1007,21 @@ let q='';
 const fm=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 const dk=()=>{const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches};
 function setTh(v,ev){
- const R=document.documentElement,ap=()=>{if(v==='auto')delete R.dataset.theme;else R.dataset.theme=v;S.th=v;save();themeColor();if(tab==='set')render()};
+ const R=document.documentElement,ap=()=>{if(v==='auto')delete R.dataset.theme;else R.setAttribute('data-theme',v);if(v==='amber')R.classList.remove('dark');S.th=v;save();themeColor();if(tab==='set')render()};
  if(!document.startViewTransition||matchMedia('(prefers-reduced-motion:reduce)').matches){R.classList.add('tt');ap();setTimeout(()=>R.classList.remove('tt'),500);return}
  const x=ev&&ev.clientX||innerWidth-36,y=ev&&ev.clientY||36,r=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
  document.startViewTransition(ap).ready.then(()=>R.animate({clipPath:['circle(0px at '+x+'px '+y+'px)','circle('+r+'px at '+x+'px '+y+'px)']},{duration:650,easing:'cubic-bezier(.4,0,.2,1)',pseudoElement:'::view-transition-new(root)'})).catch(()=>{});
 }
-function themeColor(){const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#F4F5FA'}
+function themeColor(){const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.documentElement.dataset.theme==='amber'?'#FBF9F5':getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#F4F5FA'}
 const bw=()=>{let w='';const mo=inM(today().slice(0,7));for(const k in S.bud||{}){const s=sum(mo.filter(x=>x.c===k),'out');if(S.bud[k]&&s>S.bud[k])w+='\n⚠️ Anggaran '+k+' terlampaui '+rp(s-S.bud[k])}return w};
 function cnt(){document.querySelectorAll('[data-n]').forEach(e=>{const to=+e.dataset.n,t0=performance.now();(function f(t){const p=Math.min((t-t0)/800,1);e.textContent=rp(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)})}
 const edit=id=>{const x=S.tx.find(y=>y.id===id);if(x)openSheet({id,t:x.t,c:x.c,a:fm(x.a),n:x.n,d:x.d,w:x.w})};
-function set(){const th=S.th||'auto',cap=`<div class='cap' style='margin:18px 6px 6px'>`;return `<h1>${bb()}Atur</h1>${cap}Tampilan</div><div class='seg theme-options'>${[['auto','Otomatis'],['light','Terang'],['dark','Gelap'],['amber','Amber']].map(([k,l])=>`<b class='${th===k?'on':''}' data-k='${k}' onclick='setTh(this.dataset.k,event)'>${l}</b>`).join('')}</div>${cap}Anggaran bulanan</div><div class='card'>${Object.keys(CAT.out).map(k=>`<div class='li row'><div class='ic'>${EM[k]}</div><span class='grow'>${k}</span><input class='fld bi' data-k='${k}' inputmode='numeric' placeholder='Rp 0' value='${S.bud&&S.bud[k]?fm(S.bud[k]):''}' oninput='bud(this.dataset.k,this)'></div>`).join('')}</div>${cap}Target tabungan</div><div class='card'><div class='li row'><div class='ic'>🎯</div><span class='grow'>Target</span><input class='fld bi' inputmode='numeric' placeholder='Rp 0' value='${S.tg?fm(S.tg):''}' oninput='stg(this)'></div></div>${cap}Sinkronisasi</div>${cl()}${cap}Backup ke Spreadsheet</div>${gsUI()}${cap}Salin &amp; pulihkan</div><div class='card'><textarea id='bk' class='fld' rows='3' placeholder='Tempel cadangan di sini'></textarea><div class='g2'><button class='btn' onclick='bkc()'>Salin</button><button class='btn' style='background:var(--fill);color:var(--blue)' onclick='bkr()'>Pulihkan</button></div><button class='btn' style='background:var(--fill);color:var(--red)' onclick='rst(this)'>Hapus semua data</button></div>`}
+function set(){const th=S.th||'auto',cap=`<div class='cap' style='margin:18px 6px 6px'>`;return `<h1>${bb()}Atur</h1>${cap}Tampilan</div><div class='seg'>${[['auto','Otomatis'],['light','Terang'],['dark','Gelap'],['amber','Amber']].map(([k,l])=>`<b class='${th===k?'on':''}' data-k='${k}' onclick='setTh(this.dataset.k,event)'>${l}</b>`).join('')}</div>${cap}Anggaran bulanan</div><div class='card'>${Object.keys(CAT.out).map(k=>`<div class='li row'><div class='ic'>${EM[k]}</div><span class='grow'>${k}</span><input class='fld bi' data-k='${k}' inputmode='numeric' placeholder='Rp 0' value='${S.bud&&S.bud[k]?fm(S.bud[k]):''}' oninput='bud(this.dataset.k,this)'></div>`).join('')}</div>${cap}Target tabungan</div><div class='card'><div class='li row'><div class='ic'>🎯</div><span class='grow'>Target</span><input class='fld bi' inputmode='numeric' placeholder='Rp 0' value='${S.tg?fm(S.tg):''}' oninput='stg(this)'></div></div>${cap}Sinkronisasi</div>${cl()}${cap}Backup ke Spreadsheet</div>${gsUI()}${cap}Salin &amp; pulihkan</div><div class='card'><textarea id='bk' class='fld' rows='3' placeholder='Tempel cadangan di sini'></textarea><div class='g2'><button class='btn' onclick='bkc()'>Salin</button><button class='btn' style='background:var(--fill);color:var(--blue)' onclick='bkr()'>Pulihkan</button></div><button class='btn' style='background:var(--fill);color:var(--red)' onclick='rst(this)'>Hapus semua data</button></div>`}
 function bud(k,el){const v=+el.value.replace(/\D/g,'');el.value=v?fm(v):'';(S.bud=S.bud||{})[k]=v;save()}
 function bkc(){const t=$('#bk');t.value=JSON.stringify({...S,fb:undefined,gs:undefined,pf:undefined,ses:undefined});t.select();try{navigator.clipboard.writeText(t.value)}catch(e){}}
 function bkr(){try{const o=JSON.parse($('#bk').value);if(!Array.isArray(o.tx))throw 0;S={...o,fb:S.fb,th:S.th,sy:S.sy,gs:S.gs,pf:S.pf,ses:S.ses};S.chat=S.chat||[];save();tab='home';render(1)}catch(e){$('#bk').value='';$('#bk').placeholder='Format cadangan tidak valid'}}
 function rst(b){if(!b.dataset.s){b.dataset.s=1;b.textContent='Tap lagi untuk konfirmasi';setTimeout(()=>{b.dataset.s='';b.textContent='Hapus semua data'},3000);return}S={tx:[],chat:[],th:S.th,fb:S.fb,sy:S.sy,gs:S.gs,pf:S.pf,ses:S.ses};save();tab='home';render(1)}
-if(S.th&&S.th!=='auto')document.documentElement.dataset.theme=S.th;
+if(S.th&&S.th!=='auto'){document.documentElement.setAttribute('data-theme',S.th);if(S.th==='amber')document.documentElement.classList.remove('dark')}
 themeColor();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',themeColor);
 let cm=today().slice(0,7),cd=today(),kt='out',ksm='';
