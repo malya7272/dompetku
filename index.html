@@ -562,6 +562,7 @@ const fmtD=s=>new Date(s+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long'
 const fmtS=s=>new Date(s+'T00:00:00').toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'});
 const fmtM=m=>new Date(m+'-01T00:00:00').toLocaleDateString('id-ID',{month:'long',year:'numeric'});
 const sum=(a,t)=>a.filter(x=>x.t===t).reduce((s,x)=>s+x.a,0);
+const pctFmt=n=>Number.isFinite(n)?n.toFixed(1)+'%':'–';
 const inD=d=>S.tx.filter(x=>x.d===d),inM=m=>S.tx.filter(x=>x.d.slice(0,7)===m),bal=()=>sum(S.tx,'in')-sum(S.tx,'out');
 const CAT={out:{Makanan:['makan','minum','kopi','nasi','bakso','sate','ayam','warung','resto','cafe','jajan','sarapan','snack','boba','gofood','grabfood'],Transport:['bensin','parkir','tol','ojek','grab','gojek','gocar','bus','kereta','krl','taksi','angkot','transport','servis'],Belanja:['belanja','beli','shopee','tokopedia','baju','sepatu','indomaret','alfamart','lazada'],Tagihan:['listrik','pulsa','internet','wifi','pdam','token','kos','sewa','cicilan','bpjs','tagihan','pajak'],Hiburan:['nonton','bioskop','game','netflix','spotify','liburan','wisata','konser'],Kesehatan:['obat','dokter','apotek','klinik','vitamin'],Lainnya:[]},in:{Gaji:['gaji','gajian','salary'],Bonus:['bonus','thr','hadiah'],Usaha:['jual','jualan','untung','omzet','freelance','proyek','project','klien'],Lainnya:[]}};
 const EM={Makanan:'🍜',Transport:'🚗',Belanja:'🛍️',Tagihan:'🧾',Hiburan:'🎬',Kesehatan:'💊',Lainnya:'📦',Gaji:'💼',Bonus:'🎁',Usaha:'🏪'};
@@ -922,10 +923,10 @@ function hl(){
  const lb=sc>=70?['Sehat','var(--green)','52,199,89']:sc>=45?['Baik','#FF9F0A','255,159,10']:['Buruk','var(--red)','255,59,48'];
  return{sc,lb,sr,f,s,bp}}
 function slides(p){
- const mk=n=>S.hide?'Rp ••••••':rp(n),M=today().slice(0,7),d=+today().slice(8),H=hl(),o=inM(M).filter(x=>x.t==='out'),T=sum(o,'out'),c={},cn={};o.forEach(x=>{c[x.c]=(c[x.c]||0)+x.a;cn[x.c]=(cn[x.c]||0)+1});
- const cs=Object.entries(c).sort((p,r)=>r[1]-p[1]),top=cs[0],pvv=top?sum(inM(addM(M,-1)).filter(x=>x.c===top[0]&&+x.d.slice(8)<=d),'out'):0,dd=pvv?Math.round((top[1]/pvv-1)*100):null,an0=pola().split('⚠️').length-1,f=H.f,w=H.s.sc.worst,mx=top?top[1]:1;
- const c2=`<div class='card' data-k='rep' data-a='f' onclick='an=this.dataset.a;go(this.dataset.k)' style='background:linear-gradient(135deg,rgba(${H.lb[2]},.16),var(--card) 70%)'><div class='cap'>Kondisi keuangan</div>${S.tx.length?`<div class='row sp' style='margin:6px 0'><div><div style='font-size:26px;font-weight:600;color:${H.lb[1]}'>${H.lb[0]}</div><div class='sub'>Skor ${H.sc}/100</div></div><svg viewBox='0 0 64 64' width='60'><circle cx='32' cy='32' r='26' fill='none' style='stroke:rgba(${H.lb[2]},.2)' stroke-width='7'/><circle cx='32' cy='32' r='26' fill='none' style='stroke:${H.lb[1]}' stroke-width='7' stroke-linecap='round' stroke-dasharray='${163*H.sc/100} 163' transform='rotate(-90 32 32)'/></svg></div><div class='sub' style='font-size:12px;line-height:1.5'>${H.sr===null?'Belum ada pemasukan bulan ini':'Rasio tabungan bulan ini '+Math.round(H.sr*100)+'%'}<br>${H.s.days?'Worst case sampai tgl '+H.s.A.pd+': '+w.lb+', saldo '+mk(w.end):'Hari ini gajian'}<br>Proyeksi pengeluaran ${mk(f.proj)}${f.hist?' ('+(f.proj>f.hist?'+':'')+Math.round((f.proj/f.hist-1)*100)+'% dari rata-rata)':''}</div>`:`<div class='sub' style='margin-top:10px'>Catat beberapa transaksi dulu agar kondisi keuanganmu bisa dinilai.</div>`}</div>`;
- const c3=`<div class='card' data-k='rep' data-a='p' onclick='an=this.dataset.a;go(this.dataset.k)'><div class='cap'>Terbesar bulan ini</div>${top?`<div class='row' style='margin:8px 0'><div class='ic' style='width:44px;height:44px;font-size:22px;background:${CC[top[0]]}22'>${EM[top[0]]}</div><div><div style='font-size:19px;font-weight:600'>${top[0]}</div><div class='sub'>${Math.round(top[1]/T*100)}% dari pengeluaran</div></div></div><div style='font-size:18px;font-weight:600'>${mk(top[1])}</div>${dd===null?'':`<div class='sub' style='font-size:12px;margin-top:2px'><span class='${dd>0?'out':'in'}'>${(dd>0?'↗ +':'↘ ')+dd+'%'}</span> vs bulan lalu</div>`}${an0?`<div class='sub' style='font-size:12px;margin-top:8px'>⚠️ ${an0} tidak biasa</div>`:''}`:`<div class='sub' style='margin-top:10px'>Belum ada pengeluaran.</div>`}</div>`;
+ const mk=n=>S.hide?'Rp ••••••':rp(n),M=today().slice(0,7),d=+today().slice(8),H=hl(),o=inM(M).filter(x=>x.t==='out'&&x.pl!=='t'&&x.c!=='Tabungan'),T=sum(o,'out'),c={},cn={};o.forEach(x=>{c[x.c]=(c[x.c]||0)+x.a;cn[x.c]=(cn[x.c]||0)+1});
+ const cs=Object.entries(c).sort((p,r)=>r[1]-p[1]),top=cs[0],prior=inM(addM(M,-1)).filter(x=>x.t==='out'&&x.pl!=='t'&&x.c!=='Tabungan'&&+x.d.slice(8)<=d),priorDays=new Set(prior.map(x=>x.d)).size,pvv=top?sum(prior.filter(x=>x.c===top[0]),'out'):0,dd=pvv&&H.analytics.activeDays>=15&&priorDays>=15?(top[1]/pvv-1)*100:null,an0=pola().split('⚠️').length-1,f=H.f,w=H.s.sc.worst,mx=top?top[1]:1;
+ const c2=`<div class='card' data-k='rep' data-a='f' onclick='an=this.dataset.a;go(this.dataset.k)' style='background:linear-gradient(135deg,rgba(${H.lb[2]},.16),var(--card) 70%)'><div class='cap'>Kondisi keuangan</div>${S.tx.length?`<div class='row sp' style='margin:6px 0'><div><div style='font-size:26px;font-weight:600;color:${H.lb[1]}'>${H.lb[0]}</div><div class='sub'>Skor ${H.sc}/100</div></div><svg viewBox='0 0 64 64' width='60'><circle cx='32' cy='32' r='26' fill='none' style='stroke:rgba(${H.lb[2]},.2)' stroke-width='7'/><circle cx='32' cy='32' r='26' fill='none' style='stroke:${H.lb[1]}' stroke-width='7' stroke-linecap='round' stroke-dasharray='${163*H.sc/100} 163' transform='rotate(-90 32 32)'/></svg></div><div class='sub' style='font-size:12px;line-height:1.5'>${H.sr===null?'Belum ada pemasukan bulan ini':'Rasio tabungan proyeksi '+pctFmt(H.sr*100)}<br>${H.s.days?'Worst case sampai tgl '+H.s.A.pd+': '+w.lb+', saldo '+mk(w.end):'Hari ini gajian'}<br>Proyeksi pengeluaran ${mk(f.proj)}${f.hist?' ('+(f.proj>f.hist?'+':'')+pctFmt((f.proj/f.hist-1)*100)+' dari rata-rata)':''}</div>`:`<div class='sub' style='margin-top:10px'>Catat beberapa transaksi dulu agar kondisi keuanganmu bisa dinilai.</div>`}</div>`;
+ const c3=`<div class='card' data-k='rep' data-a='p' onclick='an=this.dataset.a;go(this.dataset.k)'><div class='cap'>Terbesar bulan ini</div>${top?`<div class='row' style='margin:8px 0'><div class='ic' style='width:44px;height:44px;font-size:22px;background:${CC[top[0]]}22'>${EM[top[0]]}</div><div><div style='font-size:19px;font-weight:600'>${top[0]}</div><div class='sub'>${Math.round(top[1]/T*100)}% dari pengeluaran</div></div></div><div style='font-size:18px;font-weight:600'>${mk(top[1])}</div>${dd===null?'':`<div class='sub' style='font-size:12px;margin-top:2px'><span class='${dd>0?'out':'in'}'>${(dd>0?'↗ +':'↘ ')+pctFmt(dd)}</span> vs bulan lalu</div>`}${an0?`<div class='sub' style='font-size:12px;margin-top:8px'>⚠️ ${an0} tidak biasa</div>`:''}`:`<div class='sub' style='margin-top:10px'>Belum ada pengeluaran.</div>`}</div>`;
  const c4=`<div class='card' data-k='trx' onclick='go(this.dataset.k)'><div class='cap'>Top kategori transaksi</div>${cs.slice(0,3).map(([k,v])=>`<div style='margin-top:9px'><div class='row sp' style='font-size:13px'><span>${EM[k]} ${k} <small style='text-transform:none;opacity:.6'>${cn[k]} transaksi</small></span><b>${mk(v)}</b></div><div class='pb'><i style='width:${v/mx*100}%;background:${CC[k]}'></i></div></div>`).join('')||`<div class='sub' style='margin-top:10px'>Belum ada pengeluaran.</div>`}</div>`;
  return p===3?c3:p?c3+c4:kc()}
 function slc(){const s=document.querySelector('#v .sl');if(!s)return;const st=()=>s.children[1]?s.children[1].offsetLeft-s.children[0].offsetLeft:s.clientWidth,dd=[...document.querySelectorAll('#v .dots i')],up=()=>{const i=Math.round(s.scrollLeft/st());sli=i;dd.forEach((x,j)=>x.classList.toggle('on',j===i))};s.scrollLeft=sli*st();up();s.addEventListener('scroll',up,{passive:true});dd.forEach((x,j)=>x.onclick=()=>s.scrollTo({left:j*st(),behavior:'smooth'}))}
@@ -944,11 +945,11 @@ function kondisi(){
  <div class='card'><b style='font-size:16px'>Saran</b><div style='margin-top:6px;font-size:13px'>Perlu perhatian: <b>${wk[0]}</b>. ${tips[wi]}</div></div>`}
 function kc(){
  if(!S.tx.length)return `<div class='card'><div class='cap'>Kondisi keuangan</div><div class='sub' style='margin-top:10px'>Catat beberapa transaksi dulu agar kondisi keuanganmu bisa dinilai.</div></div>`;
- const H=hl(),f=H.f,s=H.s,w=s.sc.worst,mk=n=>S.hide?'Rp ••••••':rp(n),d=f.hist?Math.round((f.proj/f.hist-1)*100):null,neg=w.end<0;
+ const H=hl(),f=H.f,s=H.s,w=s.sc.worst,mk=n=>S.hide?'Rp ••••••':rp(n),d=f.hist?(f.proj/f.hist-1)*100:null,neg=w.end<0;
  return `<div class='card' data-k='rep' data-a='k' onclick='an=this.dataset.a;go(this.dataset.k)' style='background:linear-gradient(135deg,rgba(${H.lb[2]},.16),var(--card) 70%)'><div class='row sp'><div><div class='cap'>Kondisi keuangan</div><div style='font-size:24px;font-weight:600;color:${H.lb[1]}'>${H.lb[0]} <span class='sub'>· skor ${H.sc}</span></div></div><span class='sub' style='font-size:12px'>Detail ›</span></div>
- <div class='g2' style='margin-top:10px'><div class='hb' style='background:rgba(255,159,10,.13)'><small>Proyeksi pengeluaran</small><b>${mk(f.proj)}</b><span class='${d===null?'':d>0?'out':'in'}'>${d===null?'bulan ini':(d>0?'↗ +':'↘ ')+d+'% vs rata-rata'}</span></div>
+ <div class='g2' style='margin-top:10px'><div class='hb' style='background:rgba(255,159,10,.13)'><small>Proyeksi pengeluaran</small><b>${mk(f.proj)}</b><span class='${d===null?'':d>0?'out':'in'}'>${d===null?'bulan ini':(d>0?'↗ +':'↘ ')+pctFmt(d)+' vs rata-rata'}</span></div>
  <div class='hb' style='background:${neg?'rgba(255,59,48,.16)':'rgba(52,199,89,.13)'}'><small>Worst case ${s.days?'tgl '+s.A.pd:'hari ini'}</small><b class='${neg?'out':'in'}'>${neg?'−':''}${mk(Math.abs(w.end))}</b><span class='${neg?'out':'in'}'>${neg?'⚠️ Minus, habis ±'+(w.zero?fmtS(w.zero):'segera'):'Aman, masih bersisa'}</span></div></div>
- <div class='sub' style='font-size:12px;margin-top:8px'>${H.sr===null?'Belum ada pemasukan bulan ini':'Rasio tabungan '+Math.round(H.sr*100)+'%'} · Normal: ${mk(s.sc.normal.end)}</div></div>`}
+ <div class='sub' style='font-size:12px;margin-top:8px'>${H.sr===null?'Belum ada pemasukan bulan ini':'Rasio tabungan proyeksi '+pctFmt(H.sr*100)} · Normal: ${mk(s.sc.normal.end)}</div></div>`}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.seg b');if(!b||b.classList.contains('on')||b._go||matchMedia('(prefers-reduced-motion:reduce)').matches)return;e.stopPropagation();e.preventDefault();let n=b.parentElement.nextElementSibling;while(n){n.classList.add('fo');n=n.nextElementSibling}setTimeout(()=>{b._go=1;b.click()},140)},true);
 function mas(){const v=$('#v');if(!v||!v.children)return;const on=innerWidth>=900&&['home','trx','rep','kal'].includes(v.dataset.t);[...v.children].forEach(c=>{c.style.gridRowEnd='';if(on&&getComputedStyle(c).position!=='fixed')c.style.gridRowEnd='span '+Math.ceil((c.getBoundingClientRect().height+20)/8)})}
 addEventListener('resize',mas);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(mas);
@@ -962,7 +963,7 @@ function ask(l){
  const H=hl(),s=H.s,w=s.sc.worst,n=s.sc.normal,f=H.f;
  if(/kondisi|sehat|skor/.test(l))return `Kondisi keuanganmu ${H.lb[0]} (skor ${H.sc}/100).`;
  if(/bertahan|gajian|worst|minus|uang masuk/.test(l))return s.days?`Sampai tgl ${s.A.pd} (${s.days} hari lagi): skenario normal sisa ${rp(n.end)}, worst ${w.end<0?'minus '+rp(-w.end):'sisa '+rp(w.end)}. Batas aman ${rp(s.safe)}/hari.`:'Hari ini tanggal uang masuk.';
- if(/proyeksi|prakiraan|akhir bulan/.test(l))return `Proyeksi pengeluaran bulan ini ${rp(f.proj)}${f.hist?` (${f.proj>f.hist?'+':''}${Math.round((f.proj/f.hist-1)*100)}% dari rata-rata)`:''}.`;
+ if(/proyeksi|prakiraan|akhir bulan/.test(l))return `Proyeksi pengeluaran bulan ini ${rp(f.proj)}${f.hist?` (${f.proj>f.hist?'+':''}${pctFmt((f.proj/f.hist-1)*100)} dari rata-rata)`:''}.`;
  if(/pola|terbesar|kategori/.test(l)){const o=inM(today().slice(0,7)).filter(x=>x.t==='out'),c={};o.forEach(x=>c[x.c]=(c[x.c]||0)+x.a);const t=Object.entries(c).sort((p,r)=>r[1]-p[1])[0];return t?`Kategori terbesar bulan ini: ${t[0]} (${rp(t[1])}).`:'Belum ada pengeluaran.'}
  if(/rencana|cicilan|tabungan|target/.test(l)){const P=plan(),x=P.sc.normal;return `Rencana ${rh} bulan (normal): saldo akhir ${rp(x.end)}, sisa bebas ${rp(x.avg)}/bln. Komitmen cicilan ${rp(P.cm)} + tabungan ${rp(P.am)} per bulan${P.dti!==null&&P.cm>0?' (cicilan '+Math.round(P.dti)+'% dari pemasukan)':''}.`}
  return null}
@@ -989,11 +990,11 @@ function cicWin(t,pay){const D=S.db||[],rem=D.map(x=>Math.max(0,x.t-x.p)),pd=D.m
 function fcst(){const t=today(),m=t.slice(0,7),D=dim(m),d=+t.slice(8),a=inM(m),E=sum(a,'out');let h=0,hA=0,hd=0;for(let i=1;i<=3;i++){const p=addM(m,-i),pa=inM(p);h+=sum(pa.filter(x=>!x.pl),'out');hA+=sum(pa,'out');hd+=pa.length?dim(p):0}const cr=sum(a.filter(x=>!x.pl),'out')/d,wc=Math.min(1,d/14),rate=hd?cr*wc+(h/hd)*(1-wc):cr;return{E,I:sum(a,'in'),rate,proj:E+rate*(D-d),hist:hd?hA/hd*D:0}}
 function plan(){
  const s=sim(),A=s.A,t=today(),ys=addDays(t,-1),pm=s.pay.slice(0,7),db=S.db||[],gl=S.gl||[],w=cicWin(t,s.pay),inc=s.inc;
- const first=S.tx.reduce((m,x)=>x.d<m?x.d:m,t),sp=Math.min(60,Math.max(7,Math.round((new Date(ys)-new Date(first))/864e5)+1)),mean=[...Array(sp)].reduce((a,_,i)=>a+S.tx.filter(x=>x.d===addDays(ys,-i)&&x.t==='out'&&!x.pl).reduce((b,x)=>b+x.a,0),0)/sp,F={hemat:1-A.hm/100,normal:1,worst:1+A.wr/100},sc={};
+ const mean=s.mean,F={hemat:1-A.hm/100,normal:1,worst:1+A.wr/100},sc={};
  for(const k in F){
   const r=mean*F[k],rem=db.map((x,j)=>Math.max(0,x.t-x.p-w[j])),gp=gl.map(x=>x.p),b0=s.bal-A.bill-r*s.days,rows=[];let b=b0,mn=b0,mi=-1;
-  for(let i=0;i<rh;i++){const mo=addM(pm,i),v=r*dim(mo);let cic=0,sv=0;
-   db.forEach((x,j)=>{if(x.m>0&&rem[j]>0){const a=Math.min(x.m,rem[j]);rem[j]-=a;cic+=a}});
+  for(let i=0;i<rh;i++){const mo=addM(pm,i),payDay=+s.pay.slice(8),v=r*Math.max(0,dim(mo)-payDay+1)+(i===0&&mo===today().slice(0,7)?0:(+A.monthlyBill||0));let cic=0,sv=0;
+    db.forEach((x,j)=>{const dueDay=Math.min(x.dd||25,dim(mo));if(x.m>0&&rem[j]>0&&!(i===0&&dueDay<=payDay)){const a=Math.min(x.m,rem[j]);rem[j]-=a;cic+=a}});
    gl.forEach((x,j)=>{if(x.al>0&&gp[j]<x.t){const a=Math.min(x.al,x.t-gp[j]);gp[j]+=a;sv+=a}});
    b+=inc-v-cic-sv;rows.push({mo,v,cic,sv,bal:b});if(b<mn){mn=b;mi=i}}
   const ni=rows.findIndex(z=>z.bal<0),neg=b0<0?'sebelum tgl '+A.pd:ni>=0?fmb(rows[ni].mo):null;
@@ -1206,17 +1207,155 @@ function hdr(){const v=document.getElementById('v'),f=v&&v.firstElementChild;doc
 addEventListener('scroll',()=>document.documentElement.classList.toggle('sc',scrollY>6),{passive:true});
 function mini(){
  if(!S.tx.length)return'';
- const t=today(),M=t.slice(0,7),d=+t.slice(8),f=fcst(),m=n=>S.hide?'Rp ••••••':rp(n),
+ const t=today(),M=t.slice(0,7),d=+t.slice(8),f=fcst(),a=financialAnalytics(),m=n=>S.hide?'Rp ••••••':rp(n),
   cs=a=>{const o={};a.forEach(x=>o[x.c]=(o[x.c]||0)+x.a);return o},
   to=inD(t).filter(x=>x.t==='out'),tt=sum(to,'out'),tc=Object.entries(cs(to)).sort((a,b)=>b[1]-a[1])[0],
-  mc=cs(inM(M).filter(x=>x.t==='out')),pc=cs(inM(addM(M,-1)).filter(x=>x.t==='out'&&+x.d.slice(8)<=d));
- let tr=null;Object.keys(mc).forEach(k=>{const p=pc[k]||0;if(p>0){const df=mc[k]-p;if(!tr||df>tr.df)tr={k,df,g:Math.round((mc[k]/p-1)*100)}}});
+  mc=cs(inM(M).filter(x=>x.t==='out'&&x.pl!=='t'&&x.c!=='Tabungan')),pc=cs(inM(addM(M,-1)).filter(x=>x.t==='out'&&x.pl!=='t'&&x.c!=='Tabungan'&&+x.d.slice(8)<=d));
+ const priorDays=new Set(inM(addM(M,-1)).filter(x=>x.t==='out'&&x.pl!=='t'&&x.c!=='Tabungan'&&+x.d.slice(8)<=d).map(x=>x.d)).size;
+ let tr=null;if(a.activeDays>=15&&priorDays>=15)Object.keys(mc).forEach(k=>{const p=pc[k]||0;if(p>0){const df=mc[k]-p;if(!tr||df>tr.df)tr={k,df,g:(mc[k]/p-1)*100}}});
  const sl=(a,b,r,c)=>`<div class='card' ${c}><div class='row sp'><div style='min-width:0;flex:1'><b>${a}</b><div class='sub'>${b}</div></div>${r}</div></div>`,
   s2=sl('Pengeluaran hari ini',to.length?`${to.length} transaksi · terbesar ${esc(tc[0])}`:'Belum ada pengeluaran',`<b>${m(tt)}</b>`,`onclick="go('trx')"`),
-  s3=tr?sl('Saran tren pengeluaran',`${esc(tr.k)} ${tr.g>0?'naik':'turun'} ${Math.abs(tr.g)}% · ${tr.g>10?'coba kurangi':tr.g<-5?'pertahankan':'masih stabil'}`,`<b class='${tr.g>0?'out':'in'}'>${tr.g>0?'↗ +':'↘ '}${tr.g}%</b>`,`onclick="an='p';go('rep')"`):sl('Saran tren pengeluaran','Belum ada pembanding bulan lalu','<b>–</b>',`onclick="an='p';go('rep')"`),
-  s4=sl('Proyeksi bulan ini',`Rata-rata ${m(f.rate)}/hari${f.hist?` · ${f.proj>=f.hist?'+':''}${Math.round((f.proj/f.hist-1)*100)}% dari biasanya`:''}`,`<b>${m(f.proj)}</b>`,`onclick="an='f';go('rep')"`),
+  s3=tr?sl('Saran tren pengeluaran',`${esc(tr.k)} ${tr.g>0?'naik':'turun'} ${pctFmt(Math.abs(tr.g))} · ${tr.g>10?'coba kurangi':tr.g<-5?'pertahankan':'masih stabil'}`,`<b class='${tr.g>0?'out':'in'}'>${tr.g>0?'↗ +':'↘ '}${pctFmt(tr.g)}</b>`,`onclick="an='p';go('rep')"`):sl('Saran tren pengeluaran',a.activeDays<15?'Data belum cukup untuk perbandingan bulan ini':'Belum ada pembanding bulan lalu','<b>–</b>',`onclick="an='p';go('rep')"`),
+  s4=sl('Proyeksi bulan ini',`Rata-rata ${m(f.rate)}/hari${f.hist?` · ${f.proj>=f.hist?'+':''}${pctFmt((f.proj/f.hist-1)*100)} dari biasanya`:''}`,`<b>${m(f.proj)}</b>`,`onclick="an='f';go('rep')"`),
   s1=mini0();
  return `<div class='cr'><div class='crv'><div class='crt'>${s1}${s2}${s3}${s4}${s1}</div></div><div class='dots'><i class='on'></i><i></i><i></i><i></i></div></div>`}
+function financialAnalytics(date=today()){
+ const M=date.slice(0,7),D=dim(M),day=+date.slice(8),tx=S.tx||[],out=x=>x.t==='out'&&x.pl!=='t'&&x.c!=='Tabungan',
+  monthTx=m=>tx.filter(x=>x.d&&x.d.slice(0,7)===m),monthOut=m=>monthTx(m).filter(out),
+  amount=a=>a.reduce((n,x)=>n+(+x.a||0),0),categorySpend=a=>a.reduce((r,x)=>{r[x.c]=(r[x.c]||0)+(+x.a||0);return r},{}),
+  variable=x=>out(x)&&x.c!=='Tagihan'&&x.c!=='Lainnya'&&!x.pl,
+  essential=x=>variable(x)&&['Makanan','Transport','Kesehatan'].includes(x.c),
+  actual=monthOut(M),variableTx=actual.filter(variable),essentialTx=actual.filter(essential),
+  spend=amount(actual),variableSpend=amount(variableTx),essentialSpend=amount(essentialTx),
+  incomes=monthTx(M).filter(x=>x.t==='in'),income=amount(incomes),
+  variableDays=new Set(variableTx.map(x=>x.d)).size,activeDays=new Set(actual.map(x=>x.d)).size,
+  elapsed=Math.max(1,day),remainingDays=Math.max(0,D-day),
+  A=Object.assign({pd:25,inc:0,buf:0,bill:0,hm:20,wr:30},S.as||{}),
+  salaryRecorded=incomes.some(x=>x.c==='Gaji'||/gaji|salary/i.test(x.n||'')),
+  payMonth=day<=Math.min(+A.pd||25,dim(M))?M:addM(M,1),
+  pay=payMonth+'-'+pad(Math.min(+A.pd||25,dim(payMonth))),
+  daysToPay=Math.max(0,Math.round((new Date(pay+'T00:00:00')-new Date(date+'T00:00:00'))/864e5)),
+  b0=bal(),paidBills=amount(actual.filter(x=>x.c==='Tagihan')),
+  billRemaining=Math.max(0,(+A.bill||0)-paidBills),
+  debtToPay=cicWin(date,pay).reduce((n,x)=>n+x,0),
+  endOfMonth=date.slice(0,7)+'-'+pad(D),
+  debtToMonthEnd=cicWin(date,endOfMonth).reduce((n,x)=>n+x,0),
+  monthlyIncome=[1,2,3].map(i=>amount(monthTx(addM(M,-i)).filter(x=>x.t==='in'))).filter(Boolean),
+  expectedMonthlyIncome=+A.inc||(monthlyIncome.length?monthlyIncome.reduce((n,x)=>n+x,0)/monthlyIncome.length:0),
+  upcomingSalary=payMonth===M&&!salaryRecorded?expectedMonthlyIncome:0,
+  dailyRate=variableSpend/elapsed,essentialRate=essentialSpend/elapsed,
+  currentDaily=new Map();
+ variableTx.forEach(x=>currentDaily.set(x.d,(currentDaily.get(x.d)||0)+(+x.a||0)));
+ const recentStart=addDays(date,-30),recent=tx.filter(x=>x.d>=recentStart&&x.d<date&&variable(x)),
+  recentDays=new Map();
+ recent.forEach(x=>recentDays.set(x.d,(recentDays.get(x.d)||0)+(+x.a||0)));
+ const dailyValues=[...recentDays.values()].sort((a,b)=>a-b),p90=dailyValues.length?dailyValues[Math.min(dailyValues.length-1,Math.floor(dailyValues.length*.9))]:0;
+ const histories=[1,2,3].map(i=>{
+  const m=addM(M,-i),a=monthOut(m),v=a.filter(variable),days=new Set(a.map(x=>x.d)).size;
+  return{month:m,spend:amount(a),variable:amount(v),activeDays:days,variableDays:new Set(v.map(x=>x.d)).size,daysInMonth:dim(m)}
+ }).filter(x=>x.activeDays>=15);
+ const hist=histories.length?histories.reduce((n,x)=>n+x.spend,0)/histories.length:null,
+  histVariablePerDay=histories.length?histories.reduce((n,x)=>n+x.variable,0)/histories.reduce((n,x)=>n+x.daysInMonth,0):null,
+  trend=variableDays>=15&&histVariablePerDay>0?(dailyRate/histVariablePerDay-1)*100:null,
+  prior=histories.find(x=>x.month===addM(M,-1)),
+  monthOverMonth=activeDays>=15&&prior&&prior.spend>0?(spend+dailyRate*remainingDays+billRemaining+debtToMonthEnd-prior.spend)/prior.spend*100:null,
+  forecastSpend=spend+dailyRate*remainingDays+billRemaining+debtToMonthEnd,
+  projectedIncome=income+upcomingSalary,
+  savingsRate=forecastSpend>0&&projectedIncome>0?(projectedIncome-forecastSpend)/projectedIncome:null,
+  spendRate=spend>0&&projectedIncome>0?spend/projectedIncome:null,
+  projectedEnd=b0+upcomingSalary-dailyRate*remainingDays-billRemaining-debtToMonthEnd,
+  budget=S.bud||{},budgetTotal=Object.values(budget).reduce((n,x)=>n+(+x||0),0),
+  byCategory=categorySpend(actual),
+  budgetedSpend=Object.keys(budget).reduce((n,k)=>n+(byCategory[k]||0),0),
+  unbudgetedSpend=Math.max(0,spend-budgetedSpend),
+  budgetedUtilization=budgetTotal?budgetedSpend/budgetTotal*100:null,
+  totalBudgetUtilization=budgetTotal?spend/budgetTotal*100:null,
+  budgetCoverage=spend?budgetedSpend/spend*100:null,
+  unbudgetedShare=spend?unbudgetedSpend/spend*100:null;
+ const fixedToPayday=billRemaining+debtToPay,
+  remainingBillsToMonthEnd=billRemaining,
+  scenarioRates={hemat:dailyRate*(1-(+A.hm||0)/100),normal:dailyRate,worst:dailyRate*(1+(+A.wr||0)/100)},
+  scenarios={};
+ Object.entries(scenarioRates).forEach(([k,rate])=>{
+  const end=b0-fixedToPayday-rate*daysToPay,
+   runway=rate>0?Math.max(0,(b0-fixedToPayday)/rate):Infinity,
+   state=end<0?['bd','Minus']:end<(+A.buf||0)?['wn','Tipis']:['ok','Aman'];
+  scenarios[k]={rate,end,rw:runway,zero:Number.isFinite(runway)?addDays(date,Math.floor(runway)):null,cls:state[0],lb:state[1],after:end+upcomingSalary}
+ });
+ return{date,M,D,day,remainingDays,actual,spend,variableSpend,essentialSpend,variableDays,activeDays,dailyRate,essentialRate,p90,n:recentDays.size,
+  income,upcomingSalary,expectedMonthlyIncome,projectedIncome,spendRate,savingsRate,forecastSpend,projectedEnd,b0,A,pay,payMonth,daysToPay,
+  billRemaining,fixedToPayday,debtToPay,debtToMonthEnd,remainingBillsToMonthEnd,scenarios,hist,histories,histVariablePerDay,trend,monthOverMonth,
+  budgetTotal,budgetedSpend,unbudgetedSpend,budgetedUtilization,totalBudgetUtilization,budgetCoverage,unbudgetedShare,byCategory,
+  safe:daysToPay>0?Math.max(0,(b0-fixedToPayday-(+A.buf||0))/daysToPay):0};
+}
+function fcst(){
+ const a=financialAnalytics();
+ return{E:a.spend,I:a.income,rate:a.dailyRate,proj:a.forecastSpend,hist:a.hist,end:a.projectedEnd,trend:a.trend,mom:a.monthOverMonth,
+  variable:a.variableSpend,essential:a.essentialSpend,essentialRate:a.essentialRate,savingsRate:a.savingsRate,spendRate:a.spendRate,
+  budgetedUtilization:a.budgetedUtilization,totalBudgetUtilization:a.totalBudgetUtilization,budgetCoverage:a.budgetCoverage,
+  unbudgetedSpend:a.unbudgetedSpend,unbudgetedShare:a.unbudgetedShare};
+}
+function sim(){
+ const a=financialAnalytics(),A={...a.A,cic:a.debtToPay,bill:a.fixedToPayday,monthlyBill:+a.A.bill||0};
+ return{A,t:a.date,pay:a.pay,days:a.daysToPay,bal:a.b0,inc:a.expectedMonthlyIncome,sc:a.scenarios,mean:a.dailyRate,p90:a.p90,n:a.n,
+  safe:a.safe,fixedToPayday:a.fixedToPayday,upcomingSalary:a.upcomingSalary,analytics:a};
+}
+function hl(){
+ const a=financialAnalytics(),f=fcst(),s=sim(),normal=s.sc.normal,worst=s.sc.worst,
+  bp=a.totalBudgetUtilization,
+  p1=(normal.end>=a.A.buf?20:normal.end>=0?10:0)+(worst.end>=a.A.buf?20:worst.end>=0?10:0),
+  p2=a.savingsRate===null?15:Math.round(Math.max(0,Math.min(1,a.savingsRate/.2))*30),
+  p3=a.trend===null?8:a.trend<=0?15:a.trend<=20?8:0,
+  p4=bp===null?8:bp<=80?15:bp<=100?8:0,
+  sc=p1+p2+p3+p4,
+  lb=normal.end<0?['Waspada likuiditas','#FF9F0A','255,159,10']:sc>=70?['Sehat','var(--green)','52,199,89']:sc>=45?['Perlu perhatian','#FF9F0A','255,159,10']:['Risiko tinggi','var(--red)','255,59,48'];
+ return{sc,lb,sr:a.savingsRate,spendRate:a.spendRate,f,s,bp,parts:[
+  ['Likuiditas sampai gajian',p1,40,s.days?`Normal: sisa ${rp(normal.end)} · Terburuk: sisa ${rp(worst.end)}`:'Hari ini gajian'],
+  ['Rasio tabungan proyeksi',p2,30,a.savingsRate===null?'Belum ada pemasukan':`Tabungan ${pctFmt(a.savingsRate*100)} · pengeluaran MTD ${pctFmt(a.spendRate===null?NaN:a.spendRate*100)} · proyeksi pengeluaran ${pctFmt(a.projectedIncome>0?a.forecastSpend/a.projectedIncome*100:NaN)}`],
+  ['Tren biaya variabel',p3,15,a.trend===null?'Data pembanding belum cukup':`${a.trend>0?'+':''}${pctFmt(a.trend)} vs rata-rata harian`],
+  ['Cakupan anggaran',p4,15,bp===null?'Belum diatur':`Total belanja ${pctFmt(bp)} dari plafon · cakupan ${pctFmt(a.budgetCoverage||0)}`]
+ ],analytics:a};
+}
+function fc(){
+ const a=financialAnalytics(),D=a.D,d=a.day,W=320,H=130,mx=Math.max(a.forecastSpend,1),X=i=>8+(i-1)/(D-1||1)*(W-16),Y=v=>H-8-v/mx*(H-20),
+  daily=[...Array(D)].map((_,i)=>a.actual.filter(x=>+x.d.slice(8)===i+1).reduce((n,x)=>n+(+x.a||0),0)),
+  cumulative=[];let total=0;daily.forEach(v=>{total+=v;cumulative.push(total)});
+ const act=cumulative.slice(0,d).map((v,i)=>X(i+1)+','+Y(v)).join(' '),
+  projectFrom=Math.min(a.spend,a.forecastSpend),pr=`${X(d)},${Y(projectFrom)} ${X(D)},${Y(a.forecastSpend)}`,
+  budgetInfo=a.budgetTotal?`<div class='g2'><div class='card sm'><div class='cap'>Realisasi kategori beranggaran</div><b>${pctFmt(a.budgetedUtilization)}</b></div><div class='card sm'><div class='cap'>Total belanja / plafon</div><b>${pctFmt(a.totalBudgetUtilization)}</b></div></div><div class='card sm'>Cakupan anggaran ${pctFmt(a.budgetCoverage||0)} · pengeluaran tanpa anggaran ${rp(a.unbudgetedSpend)} (${pctFmt(a.unbudgetedShare||0)}).</div>`:`<div class='card sm'>Belum ada plafon anggaran untuk membandingkan pengeluaran.</div>`;
+ const benchmark=a.hist===null?'Belum cukup data pembanding bulan penuh.':`${a.forecastSpend>=a.hist?'+':''}${pctFmt((a.forecastSpend/a.hist-1)*100)} dari rata-rata bulan historis.`;
+ return `<h1>Prakiraan</h1><div class='sub'>${fmtM(a.M)}</div>
+ <div class='card'><div class='cap'>Proyeksi pengeluaran akhir bulan</div><div class='big2' data-n='${a.forecastSpend}'>${rp(a.forecastSpend)}</div>
+ <svg viewBox='0 0 ${W} ${H}' width='100%'><polyline points='${act}' fill='none' stroke='var(--blue)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/><polyline points='${pr}' fill='none' stroke='var(--blue)' stroke-width='2.5' stroke-dasharray='5 5' opacity='.5'/></svg>
+ <div class='row sp'><small>Aktual</small><small>Proyeksi</small></div></div>
+ <div class='g2'><div class='card sm'><div class='cap'>Biaya variabel per hari</div><b>${rp(a.dailyRate)}</b></div><div class='card sm'><div class='cap'>Biaya esensial per hari</div><b>${rp(a.essentialRate)}</b></div>
+ <div class='card sm'><div class='cap'>Rasio pengeluaran MTD</div><b>${pctFmt(a.spendRate===null?NaN:a.spendRate*100)}</b></div><div class='card sm'><div class='cap'>Rasio pengeluaran proyeksi</div><b>${pctFmt(a.projectedIncome>0?a.forecastSpend/a.projectedIncome*100:NaN)}</b></div>
+ <div class='card sm'><div class='cap'>Rasio tabungan proyeksi</div><b>${pctFmt(a.savingsRate===null?NaN:a.savingsRate*100)}</b></div>
+ <div class='card sm'><div class='cap'>Saldo akhir bulan · normal</div><b class='${a.projectedEnd<0?'out':'in'}'>${rp(a.projectedEnd)}</b></div><div class='card sm'><div class='cap'>Saldo sebelum gajian · normal</div><b class='${a.scenarios.normal.end<0?'out':'in'}'>${rp(a.scenarios.normal.end)}</b></div></div>
+ <div class='card'>${benchmark}${a.trend===null?'':` Tren biaya variabel harian ${a.trend>0?'+':''}${pctFmt(a.trend)} dari baseline.`}</div>
+ ${budgetInfo}`;
+}
+function pola(){
+ const a=financialAnalytics(),categories=Object.entries(a.byCategory).sort((x,y)=>y[1]-x[1]),
+  priorData=a.histories,alerts=[];
+ if(a.activeDays>=15){
+  categories.forEach(([k,v])=>{
+   const hist=priorData.map(x=>{const m=monthOutForAnalytics(x.month,k);return m;}).filter(x=>x>0);
+   if(hist.length){
+    const baseline=hist.reduce((n,x)=>n+x,0)/hist.length,projected=v/Math.max(a.day,1)*a.D;
+    if(projected>baseline*1.5)alerts.push(`<b class='out'>${esc(k)}</b> diperkirakan ${rp(projected)} bulan ini, rata-rata historis ${rp(baseline)}.`);
+   }
+  });
+ }
+ return `<div style='font-size:20px;font-weight:600;margin:6px 0 2px'>Pola Pengeluaran</div><div class='sub'>${fmtM(a.M)}</div>
+ <div class='card'><div class='row sp'><b>Kategori terbesar</b><span class='sub' data-k='trx' onclick='go(this.dataset.k)'>Transaksi ›</span></div>
+ ${categories.length?categories.map(([k,v])=>`<div class='li row sp'><span>${EM[k]||'📦'} ${esc(k)} <small>${a.spend?Math.round(v/a.spend*100):0}%</small></span><b>${rp(v)}</b></div>`).join(''):'<p class="sub">Belum ada pengeluaran.</p>'}</div>
+ <div class='card'><b>Tren biaya variabel</b><div class='sub' style='margin-top:8px'>${a.trend===null?'Perbandingan ditahan: dibutuhkan minimal 15 hari aktif dan data historis yang cukup.':`${a.trend>0?'+':''}${pctFmt(a.trend)} dibanding rata-rata harian historis.`}</div>
+ ${alerts.length?alerts.map(x=>`<div style='background:rgba(255,59,48,.09);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px'>⚠️ ${x}</div>`).join(''):'<div class="sub" style="margin-top:8px">Tidak ada anomali terukur dengan data yang tersedia.</div>'}</div>`;
+}
+function monthOutForAnalytics(month,category){
+ return(S.tx||[]).filter(x=>x.d&&x.d.slice(0,7)===month&&x.c===category&&x.t==='out'&&x.pl!=='t'&&x.c!=='Tabungan').reduce((n,x)=>n+(+x.a||0),0);
+}
 let crI=0,crT=null;
 function crGo(i,anim){const t=document.querySelector('#v .crt');if(!t)return;const n=t.children.length-1;crI=i;
  t.style.transition=anim?'transform .55s cubic-bezier(.4,0,.2,1)':'none';t.style.transform=`translateX(calc(${-i} * (100% + 12px)))`;
