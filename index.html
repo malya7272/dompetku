@@ -48,6 +48,8 @@ small,.cap{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spaci
 #cmp input{flex:1;border:0;border-radius:20px;background:var(--fill);padding:10px 14px;font-size:16px;color:var(--tx);outline:0}
 #cmp button{border:0;border-radius:50%;width:38px;height:38px;background:var(--blue);color:#fff;font-size:18px}
 #msgs{padding-bottom:70px}
+#v[data-t=chat] #msgs{padding-bottom:150px}
+html.has-quick-record #v[data-t=chat] #msgs{padding-bottom:210px}
 .b{max-width:84%;padding:9px 13px;border-radius:18px;margin:6px 0;font-size:15px;width:fit-content}
 .b.u{background:var(--blue);color:#fff;margin-left:auto;border-bottom-right-radius:5px}
 .b.a{background:var(--card);border-bottom-left-radius:5px}
@@ -716,17 +718,17 @@ html[data-theme=amber]{
  --border-color:#262420;--text-primary:#141413;--text-secondary:#57534E;
  --accent-primary:#F7B917;--accent-primary-text:#141413;--accent-secondary:#18181B;
  --bg:var(--bg-canvas);--card:var(--bg-surface);--tx:var(--text-primary);--sub:var(--text-secondary);
- --line:var(--border-color);--blue:var(--accent-primary);--ct:var(--accent-secondary);
+ --line:rgba(38,36,32,.16);--blue:var(--accent-primary);--ct:var(--accent-secondary);
  --green:#287348;--red:#B42318;--chart-accent:#8A4B00;
- --fill:var(--bg-subtle);--bar:var(--bg-canvas);--gb:var(--bg-highlight);--gbd:var(--border-color);
+ --fill:var(--bg-subtle);--bar:rgba(251,249,245,.94);--gb:rgba(254,244,214,.94);--gbd:rgba(38,36,32,.2);
  --gi:var(--bg-highlight);--thumb:var(--bg-surface);--h1:var(--accent-primary);--h2:var(--accent-primary);
  --cb1:var(--accent-primary);--cb2:var(--accent-primary);--ci:var(--accent-primary-text);
- --cs:var(--bg-highlight);--bgimg:none;
+ --cs:rgba(138,75,0,.2);--sh:0 6px 24px rgba(38,36,32,.08);--bgimg:none;
  --hct:#FFFFFF;--hsub:#FFFFFFD9;--hbt:#00000024;--hbar:#FFFFFF;
 }
 html[data-theme=amber] body{background:var(--bg);color:var(--tx)}
-html[data-theme=amber] .card:not(.hero),html[data-theme=amber] .gc{background-color:var(--bg-surface);border-color:var(--border-color)}
-html[data-theme=amber] #v:not(.desktop-home) .card:not(.hero){border-color:var(--border-color)}
+html[data-theme=amber] .card:not(.hero),html[data-theme=amber] .gc{background-color:var(--bg-surface);border-color:var(--line)}
+html[data-theme=amber] #v:not(.desktop-home) .card:not(.hero){border-color:var(--line)}
 html[data-theme=amber] .fld,html[data-theme=amber] #cmp input,
 html[data-theme=amber] .chip:not(.on),html[data-theme=amber] .hb{background-color:var(--bg-subtle);color:var(--text-primary)}
 html[data-theme=amber] .sub,html[data-theme=amber] small,
@@ -740,6 +742,11 @@ html[data-theme=amber] .cc.sel{border-color:var(--accent-primary);background-col
 html[data-theme=amber] .cc.su{background-color:var(--bg-highlight)}
 html[data-theme=amber] .st.wn{background-color:var(--bg-highlight);color:var(--accent-secondary)}
 html[data-theme=amber] .tab.on{color:var(--accent-secondary)}
+html[data-theme=amber] .tab.ctr,
+html[data-theme=amber] .tab.ctr.on{
+ background:linear-gradient(160deg,#F7B917,#E5A80A);color:#141413;
+ box-shadow:0 0 0 4px var(--gb),0 8px 20px rgba(138,75,0,.2),inset 0 1px 0 rgba(255,255,255,.55)
+}
 html[data-theme=amber] .seg b.on{background-color:var(--accent-primary);color:var(--accent-primary-text)}
 html[data-theme=amber] .btn,
 html[data-theme=amber] .fab,
@@ -887,10 +894,36 @@ html[data-theme=amber] .desktop-home .db-gauge .track{stroke:#F5F1E8}
 .chat-sticky .cap{margin:6px 4px 2px!important}
 html[data-theme=amber] .chat-sticky{background:color-mix(in srgb,var(--bg) 97%,transparent)}
 html[data-theme=amber] .chat-slide .gc{border-color:var(--line)}
+#quick-record{
+ display:none;position:fixed;z-index:4;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px) + 60px);
+ max-width:496px;margin:0 auto;padding:7px 10px 8px;border:1px solid var(--gbd);border-radius:18px;
+ background:var(--bar);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);
+ box-shadow:0 6px 22px rgba(0,0,0,.08)
+}
+#quick-record .cap{margin:0 2px 5px;line-height:1.2}
+#quick-record .chips{display:flex;gap:8px;min-width:0;margin:0;padding:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;touch-action:pan-x;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap}
+#quick-record .chips::-webkit-scrollbar{display:none}
+#quick-record .chip{
+ flex:0 0 auto;min-height:32px;margin:0;padding:7px 10px;border:1px solid var(--line);border-radius:999px;
+ background:var(--card);color:var(--tx);font:inherit;font-size:12px;line-height:1.2;white-space:nowrap;cursor:pointer
+}
+#quick-record .chip:active{transform:scale(.97)}
+html[data-theme=amber] #quick-record{background:rgba(251,249,245,.97);border-color:rgba(38,36,32,.2)}
+html[data-theme=amber] #quick-record .chip{background:var(--bg-subtle);border-color:rgba(38,36,32,.16);color:var(--text-primary)}
+html[data-theme=amber] .chat-slide .gc{background:var(--bg-surface);color:var(--text-primary)}
 @media (prefers-reduced-motion:reduce){.chat-carousel-track{transition:none}}
 @media (max-width:899px){
  #v>.chat-sticky.shd{margin:0 0 8px!important;padding: max(8px,env(safe-area-inset-top,0px)) 0 10px!important}
  .chat-slide .gc{height:156px;min-height:156px;padding:14px}
+}
+@media (min-width:600px) and (max-width:899px){
+ #quick-record{bottom:calc(84px + env(safe-area-inset-bottom,0px) + 60px)}
+}
+@media (min-width:900px){
+ #quick-record{left:140px;right:40px;bottom:106px;max-width:860px}
+}
+@media (min-width:1024px){
+ #quick-record{left:116px;right:36px;bottom:74px;width:min(720px,calc(100% - 180px));max-width:none}
 }
 </style>
 </head>
@@ -907,6 +940,7 @@ html[data-theme=amber] .chat-slide .gc{border-color:var(--line)}
  </header>
 </div>
 <main id="v"></main>
+<div id="quick-record" aria-label="Pintasan catatan cepat"></div>
 <div id="cmp"><input id="ci" placeholder="Contoh: makan siang 25rb" enterkeyhint="send" autocomplete="off"><button onclick="send()">↑</button></div>
 <div id="tb"></div>
 <div id="sheet" onclick="if(event.target===this)closeSheet()"></div>
@@ -1081,7 +1115,7 @@ function render(a,b){
  desktopSync();
  hdr();
  if(a)$('#tb').innerHTML=NAV.map(([k,l,p])=>`<div class="tab ${k===tab?'on':''}${k==='chat'?' ctr':''}" aria-label="${l}" title="${l}" onclick="go('${k}')"><svg viewBox="0 0 24 24">${p}</svg>${k==='chat'?'':`<span>${l}</span>`}</div>`).join('');
- $('#cmp').style.display=tab==='chat'?'flex':'none';if(a){cnt();glass()}seg();slc();emph();mas();dmb();chatCarouselInit();
+ $('#cmp').style.display=tab==='chat'?'flex':'none';const quick=$('#quick-record'),showQuick=tab==='chat'&&freq().length>0;quick.innerHTML=showQuick?quickRecords():'';quick.style.display=showQuick?'block':'none';document.documentElement.classList.toggle('has-quick-record',showQuick);if(a){cnt();glass()}seg();slc();emph();mas();dmb();chatCarouselInit();
 }
 let desktopViewport=matchMedia('(min-width:1024px)').matches;
 addEventListener('resize',()=>{const next=matchMedia('(min-width:1024px)').matches;if(next!==desktopViewport){desktopViewport=next;render(1);window.scrollTo(0,0)}});
@@ -1454,11 +1488,15 @@ function chatCarouselInit(){
  clearInterval(chatCarouselTimer);chatCarouselTimer=null;
  const c=$('#chat-carousel');if(!c||tab!=='chat'||c.querySelectorAll('.chat-slide').length<2||document.hidden||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
  chatCarouselGo(chatSlideIndex,false);
- chatCarouselTimer=setInterval(()=>{if(matchMedia('(prefers-reduced-motion:reduce)').matches){clearInterval(chatCarouselTimer);chatCarouselTimer=null;return}if(!document.hidden&&tab==='chat')chatCarouselStep(1,false)},3000)
+ chatCarouselTimer=setInterval(()=>{if(matchMedia('(prefers-reduced-motion:reduce)').matches){clearInterval(chatCarouselTimer);chatCarouselTimer=null;return}if(!document.hidden&&tab==='chat')chatCarouselStep(1,false)},5000)
+}
+function quickRecords(){
+ const f=freq().slice(0,6);if(!f.length)return'';
+ return `<div class='cap'>Sering dicatat</div><div class='chips' role='group' aria-label='Pintasan catatan cepat'>${f.map((x,i)=>`<button type='button' class='chip' data-i='${i}' onclick='qa(+this.dataset.i)' aria-label='Catat ${esc(x.n)}, ${kf(x.a)}'>${EM[x.c]||'📦'} ${esc(x.n)} · ${kf(x.a)} <small style='text-transform:none;opacity:.6'>×${x.cnt}</small></button>`).join('')}</div>`
 }
 function chat(){
  const h=new Date().getHours(),gr=h<11?'pagi':h<15?'siang':h<18?'sore':'malam',m=S.chat.length?S.chat:[{r:'a',t:'Ketik, mis. “makan siang 25rb” atau “gajian 5jt”. Tanya juga: “saldo”, “bulan ini”.'}],f=freq().slice(0,6);
- return `<div class='chat-sticky'><div class='chat-sticky-head'>${bb()}<div class='gh'>Selamat ${gr}, ${nm()}! ✌️</div></div>${gcards(ins())}</div>${f.length?`<div class='cap' style='margin:12px 4px 2px'>Sering dicatat</div><div class='chips'>${f.map((x,i)=>`<span class='chip' data-i='${i}' onclick='qa(+this.dataset.i)'>${EM[x.c]||'📦'} ${esc(x.n)} · ${kf(x.a)} <small style='text-transform:none;opacity:.6'>×${x.cnt}</small></span>`).join('')}`:''}<div id='msgs'>${m.slice(-60).map(x=>`<div class='b ${x.r}'>${esc(x.t).replace(/\n/g,'<br>')}</div>`).join('')}${f.length?`<div class='b a'>💡 Pola kebiasaanmu: ${f.slice(0,3).map(x=>esc(x.n)+' ('+rp(x.a)+')').join(', ')}. Tap pintasan di atas, atau ketik namanya saja tanpa nominal — nominal biasanya terisi otomatis.</div>`:''}</div>`}
+ return `<div class='chat-sticky'><div class='chat-sticky-head'>${bb()}<div class='gh'>Selamat ${gr}, ${nm()}! ✌️</div></div>${gcards(ins())}</div><div id='msgs'>${m.slice(-60).map(x=>`<div class='b ${x.r}'>${esc(x.t).replace(/\n/g,'<br>')}</div>`).join('')}${f.length?`<div class='b a'>💡 Pola kebiasaanmu: ${f.slice(0,3).map(x=>esc(x.n)+' ('+rp(x.a)+')').join(', ')}. Gunakan pintasan catatan cepat di atas kolom input, atau ketik namanya tanpa nominal agar nominal terakhir terisi otomatis.</div>`:''}</div>`}
 function emph(){
  const v=$('#v');if(!v||!v.ownerDocument||!document.createTreeWalker)return;
  const w=document.createTreeWalker(v,NodeFilter.SHOW_TEXT),L=[];let n;
