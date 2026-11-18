@@ -955,13 +955,19 @@ function pick(s){cd=s;cm=s.slice(0,7);render()}
 function kn(n){const g0=$('#v .cg');if(g0&&!kn.w){g0.classList.add('fo');kn.w=1;setTimeout(()=>{kn(n);kn.w=0},140);return}if(!n)cm=today().slice(0,7);else cm=addM(cm,n);cd=cm===today().slice(0,7)?today():cm+'-01';ksm='';render();const g=$('#v .cg');if(g)g.classList.add('fd')}
 function ka(){openSheet({t:'out',c:'Makanan',a:'',n:'',d:cd})}
 function kg(){ksm='…';render();setTimeout(gen,650)}
-function gen(){const a=inM(cm),o=a.filter(x=>x.t==='out');if(!o.length){ksm='Belum ada pengeluaran.';render();return}
-const E=sum(a,'out'),I=sum(a,'in'),c={},dd={};o.forEach(x=>{c[x.c]=(c[x.c]||0)+x.a;dd[x.d]=(dd[x.d]||0)+x.a});
-const tc=Object.entries(c).sort((p,r)=>r[1]-p[1])[0],tdd=Object.entries(dd).sort((p,r)=>r[1]-p[1])[0],pe=sum(inM(addM(cm,-1)),'out');
-ksm='Terbesar: '+tc[0]+' ('+rp(tc[1])+', '+Math.round(tc[1]/E*100)+'%). Paling boros: '+fmtS(tdd[0])+' ('+rp(tdd[1])+').'+(pe?' Pengeluaran '+(E>=pe?'naik ':'turun ')+Math.abs(Math.round((E/pe-1)*100))+'% dari bulan lalu.':'');
+function gen(){const report=financialAnalytics(cm+'-01'),o=report.actual,E=report.spend,I=report.income;if(!o.length){ksm=monthExpenseConclusion(E,I);render();return}
+const c={},dd={};o.forEach(x=>{c[x.c]=(c[x.c]||0)+x.a;dd[x.d]=(dd[x.d]||0)+x.a});
+const tc=Object.entries(c).sort((p,r)=>r[1]-p[1])[0],tdd=Object.entries(dd).sort((p,r)=>r[1]-p[1])[0],pe=financialAnalytics(addM(cm,-1)+'-01').spend;
+ksm=monthExpenseConclusion(E,I)+' Kategori terbesar: '+tc[0]+' ('+rp(tc[1])+', '+Math.round(tc[1]/E*100)+'%). Pengeluaran tertinggi: '+fmtS(tdd[0])+' ('+rp(tdd[1])+').'+(pe?' Total pengeluaran '+(E>=pe?'naik ':'turun ')+Math.abs(Math.round((E/pe-1)*100))+'% dari bulan lalu.':'');
 render()}
+function monthExpenseConclusion(expense,income){
+ if(expense<=0)return income>0?'Belum ada pengeluaran tercatat bulan ini.':'Belum ada pemasukan atau pengeluaran yang diperhitungkan bulan ini.';
+ if(income<=0)return `Pengeluaran tercatat ${rp(expense)}; belum ada pemasukan tercatat, jadi rasio belum dapat dihitung.`;
+ const ratio=(expense/income).toFixed(1).replace('.',','),gap=expense-income;
+ return gap>0?`Pengeluaran ${ratio}× dari pemasukan tercatat; melebihi pemasukan ${rp(gap)}.`:gap<0?`Pengeluaran ${ratio}× dari pemasukan tercatat; sisa pemasukan ${rp(-gap)}.`:'Pengeluaran sama dengan pemasukan tercatat.';
+}
 function kal(){
- const[y,mo]=cm.split('-').map(Number),off=(new Date(y,mo-1,1).getDay()+6)%7,a=inM(cm),E=sum(a,'out'),I=sum(a,'in'),n=I-E,net=kt==='net',sd=inD(cd);
+ const[y,mo]=cm.split('-').map(Number),off=(new Date(y,mo-1,1).getDay()+6)%7,summary=financialAnalytics(cm+'-01'),E=summary.spend,I=summary.income,n=I-E,net=kt==='net',sd=inD(cd);
  let g='';
  for(let i=0;i<42;i++){const d=new Date(y,mo-1,1-off+i),s=ymd(d),x=inD(s),v=sum(x,'in')-sum(x,'out');
   g+=`<div class='cc${d.getMonth()===mo-1?'':' o'}${d.getDay()===0?' su':''}${s===cd?' sel':''}' data-d='${s}' onclick='pick(this.dataset.d)'><span class='${s===today()?'td':''}'>${d.getDate()}</span>${x.length?`<em class='am ${v<0?'out':'in'}'>${v<0?'−':'+'}${kf(v)}</em>`:''}</div>`}
@@ -970,7 +976,7 @@ function kal(){
  <div class='wk'>${['SEN','SEL','RAB','KAM','JUM','SAB','MIN'].map(w=>`<span>${w}</span>`).join('')}</div><div class='cg'>${g}</div></div>
  <div class='card'><div class='row'><div class='cic' style='background:var(--blue);color:#fff'>✨</div><div class='grow'><b>Ringkasan AI</b></div><button class='pill' style='background:var(--blue);color:#fff;border:0' onclick='kg()'>Buat ringkasan</button></div>
  <div class='seg'><b class='${net?'':'on'}' data-k='out' onclick='kt=this.dataset.k;render()'>Pengeluaran</b><b class='${net?'on':''}' data-k='net' onclick='kt=this.dataset.k;render()'>Selisih</b></div>
- <div style='border-radius:13px;padding:11px 12px;background:${net?'rgba(52,199,89,.12)':'rgba(255,59,48,.09)'}'><div class='cap'>${net?'Selisih':'Pengeluaran'}</div><div class='big2 ${net?(n<0?'out':'in'):'out'}'>${rp(net?n:E)}</div><div class='sub'>${net?'Masuk '+rs(I)+' − keluar '+rs(E):I?Math.round(E/I*100)+'% dari pemasukan':''}</div></div>
+ <div style='border-radius:13px;padding:11px 12px;background:${net?'rgba(52,199,89,.12)':'rgba(255,59,48,.09)'}'><div class='cap'>${net?'Selisih':'Pengeluaran'}</div><div class='big2 ${net?(n<0?'out':'in'):'out'}'>${rp(net?n:E)}</div><div class='sub'>${net?'Masuk tercatat '+rs(I)+' − pengeluaran '+rs(E):monthExpenseConclusion(E,I)}</div></div>
  ${ksm?`<div class='sub' style='margin-top:10px;color:var(--tx);animation:fade .4s'>✨ ${ksm==='…'?'Menyusun ringkasan…':esc(ksm)}</div>`:''}</div>
  <div class='card'><div class='row sp'><b>${fmtD(cd)}</b><button class='pill' onclick='ka()'>+ Tambah</button></div>${sd.length?sd.sort((p,r)=>r.id-p.id).map(row).join(''):`<p class='sub'>Tidak ada transaksi.</p>`}</div>`}
 let pr='m';
