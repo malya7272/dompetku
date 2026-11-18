@@ -886,6 +886,10 @@ html[data-theme=amber] .desktop-home .db-gauge .track{stroke:#F5F1E8}
 .chat-slide-copy{font-size:15px;line-height:1.45}
 .chat-slide-copy b{color:var(--ct)}
 .chat-slide-detail{align-self:flex-start;border:0;cursor:pointer}
+.ai-summary{padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--card);color:var(--tx);font-size:13px;line-height:1.5}
+.ai-summary[data-severity=warning]{border-color:#D99A19;background:rgba(247,185,23,.1)}
+.ai-summary[data-severity=critical]{border-color:var(--red);background:color-mix(in srgb,var(--red) 9%,var(--card))}
+.ai-summary.loading{color:var(--sub)}
 .chat-carousel-controls{display:flex;align-items:center;justify-content:center;gap:12px;padding-top:7px}
 .chat-carousel-arrow{width:28px;height:28px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--tx);font-size:18px;line-height:1;cursor:pointer}
 .chat-carousel-dots{display:flex;align-items:center;gap:7px}
@@ -1171,11 +1175,76 @@ function pick(s){cd=s;cm=s.slice(0,7);render()}
 function kn(n){const g0=$('#v .cg');if(g0&&!kn.w){g0.classList.add('fo');kn.w=1;setTimeout(()=>{kn(n);kn.w=0},140);return}if(!n)cm=today().slice(0,7);else cm=addM(cm,n);cd=cm===today().slice(0,7)?today():cm+'-01';ksm='';render();const g=$('#v .cg');if(g)g.classList.add('fd')}
 function ka(){openSheet({t:'out',c:'Makanan',a:'',n:'',d:cd})}
 function kg(){ksm='…';render();setTimeout(gen,650)}
-function gen(){const report=financialAnalytics(cm+'-01'),o=report.actual,E=report.spend,I=report.income;if(!o.length){ksm=monthExpenseConclusion(E,I);render();return}
-const c={},dd={};o.forEach(x=>{c[x.c]=(c[x.c]||0)+x.a;dd[x.d]=(dd[x.d]||0)+x.a});
-const tc=Object.entries(c).sort((p,r)=>r[1]-p[1])[0],tdd=Object.entries(dd).sort((p,r)=>r[1]-p[1])[0],pe=financialAnalytics(addM(cm,-1)+'-01').spend;
-ksm=monthExpenseConclusion(E,I)+' Kategori terbesar: '+tc[0]+' ('+rp(tc[1])+', '+Math.round(tc[1]/E*100)+'%). Pengeluaran tertinggi: '+fmtS(tdd[0])+' ('+rp(tdd[1])+').'+(pe?' Total pengeluaran '+(E>=pe?'naik ':'turun ')+Math.abs(Math.round((E/pe-1)*100))+'% dari bulan lalu.':'');
-render()}
+function gen(){
+ const currentCycle=cm===today().slice(0,7),date=currentCycle?today():cm+'-'+pad(dim(cm)),report=financialAnalytics(date),actual=report.actual,
+  prev=financialAnalytics(addM(cm,-1)+'-'+pad(dim(addM(cm,-1)))),categories=Object.entries(report.byCategory).sort((a,b)=>b[1]-a[1]),
+  daily={},top=categories[0],peak=Object.entries(actual.reduce((all,x)=>{all[x.d]=(all[x.d]||0)+(+x.a||0);return all},daily)).sort((a,b)=>b[1]-a[1])[0],
+  fixedPaid=actual.filter(x=>x.c==='Tagihan').reduce((n,x)=>n+(+x.a||0),0),
+  irregularSpend=actual.filter(x=>x.c==='Lainnya').reduce((n,x)=>n+(+x.a||0),0),
+  elapsed=currentCycle?report.day:report.D,
+  variableDailyRate=elapsed>0?Math.max(0,report.spend-fixedPaid-irregularSpend)/elapsed:0,
+  remainingFixedBills=currentCycle?Math.max(0,(+report.A.bill||0)-fixedPaid):0,
+  projectedMonthlySpend=report.spend+variableDailyRate*(currentCycle?report.remainingDays:0)+remainingFixedBills,
+  summary=buildFinancialAISummary({
+   totalSpent:report.spend,actualIncomeMTD:report.income,effectiveIncome:currentCycle?report.effectiveIncome:report.income,
+   currentCashBalance:currentCycle?report.b0:0,remainingFixedBills,daysToPayday:currentCycle?report.daysToPay:0,
+   paydayDate:report.A.pd,variableDailyRate,projectedMonthlySpend,
+   topCategory:top?{name:top[0],amount:top[1],sharePct:report.spend?Math.round(top[1]/report.spend*100):0,hasBudget:(+((S.bud||{})[top[0]])||0)>0}:null,
+   peakDay:peak?{label:fmtS(peak[0]),amount:peak[1]}:null,
+   prevMonthSpend:prev.spend,prevMonthActiveDays:prev.activeDays,formatRp:rp,isCurrentCycle:currentCycle
+  });
+ ksm=summary;render()
+}
+function buildFinancialAISummary(metrics){
+ const num=v=>Number.isFinite(+v)?+v:0,
+  {topCategory,peakDay,formatRp=rp}=metrics,
+  totalSpent=Math.max(0,num(metrics.totalSpent)),actualIncomeMTD=num(metrics.actualIncomeMTD),
+  effectiveIncome=Math.max(0,num(metrics.effectiveIncome)),currentCashBalance=num(metrics.currentCashBalance),
+  remainingFixedBills=Math.max(0,num(metrics.remainingFixedBills)),daysToPayday=Math.max(0,num(metrics.daysToPayday)),
+  variableDailyRate=Math.max(0,num(metrics.variableDailyRate)),projectedMonthlySpend=Math.max(0,num(metrics.projectedMonthlySpend)),
+  spendableCash=Math.max(0,currentCashBalance-remainingFixedBills),
+  safeDailyLimit=daysToPayday>0?Math.floor(spendableCash/daysToPayday):spendableCash,
+  capacityUsedPct=effectiveIncome>0?totalSpent/effectiveIncome*100:0,
+  remainingCapacity=effectiveIncome-totalSpent;
+ let severity='neutral';
+ if(effectiveIncome>0&&capacityUsedPct>100||daysToPayday>0&&spendableCash<=0)severity='critical';
+ else if(effectiveIncome>0&&capacityUsedPct>=75||daysToPayday>0&&safeDailyLimit<variableDailyRate)severity='warning';
+ const expenseCardHeadline=effectiveIncome>0
+  ?`Terpakai ${capacityUsedPct.toFixed(1)}% dari kapasitas pendapatan siklus (${formatRp(effectiveIncome)}); ${remainingCapacity>=0?`sisa ruang belanja ${formatRp(remainingCapacity)} sebelum gajian.`:`melewati kapasitas pendapatan sebesar ${formatRp(Math.abs(remainingCapacity))}.`}`
+  :`Total pengeluaran berjalan ${formatRp(totalSpent)} dengan laju rutin ${formatRp(Math.round(variableDailyRate))}/hari.`,
+ paretoInsight=topCategory&&peakDay
+  ?`Laju belanja rutin ${formatRp(Math.round(variableDailyRate))}/hari, dengan konsentrasi terbesar pada ${topCategory.hasBudget?'kategori dominan':'pos tak teranggarkan'} ${topCategory.name} (${formatRp(topCategory.amount)}, ${topCategory.sharePct}%) dan lonjakan tertinggi pada ${peakDay.label} (${formatRp(peakDay.amount)}).`
+  :topCategory
+   ?`Laju belanja rutin ${formatRp(Math.round(variableDailyRate))}/hari, dengan konsentrasi terbesar pada ${topCategory.hasBudget?'kategori dominan':'pos tak teranggarkan'} ${topCategory.name} (${formatRp(topCategory.amount)}, ${topCategory.sharePct}%).`
+   :'Belum ada transaksi pengeluaran untuk mengidentifikasi kategori dan hari dengan pengeluaran tertinggi.',
+ paydayLabel=String(metrics.paydayDate||'25'),
+ liquidityAction=daysToPayday>0
+  ?currentCashBalance-remainingFixedBills<=0
+   ?currentCashBalance<=0
+    ?`Saldo kas tercatat ${formatRp(currentCashBalance)}; tahan pengeluaran non-esensial sampai pemasukan berikutnya, sekitar tanggal ${paydayLabel}.`
+    :`Kas tersedia ${formatRp(currentCashBalance)} belum cukup untuk menutup tagihan tersisa ${formatRp(remainingFixedBills)}. Tahan pengeluaran non-esensial sampai pemasukan berikutnya, sekitar tanggal ${paydayLabel}.`
+   :`Dengan sisa kas ${formatRp(currentCashBalance)} dan tagihan tersisa ${formatRp(remainingFixedBills)} untuk ${daysToPayday} hari lagi, batasi belanja maksimal ${formatRp(safeDailyLimit)}/hari agar tidak defisit sebelum gajian tanggal ${paydayLabel}.`
+  :metrics.isCurrentCycle
+   ?'Siklus gajian telah tiba; evaluasi realisasi anggaran sebelum mengalokasikan pos bulan berikutnya.'
+   :'Data kas menuju gajian hanya tersedia untuk siklus bulan berjalan.',
+ prevMonthSpend=Math.max(0,num(metrics.prevMonthSpend)),prevMonthActiveDays=Math.max(0,num(metrics.prevMonthActiveDays));
+ let trendNote='';
+ if(metrics.isCurrentCycle&&prevMonthActiveDays>=15&&prevMonthSpend>0){
+  const momDiffPct=(projectedMonthlySpend-prevMonthSpend)/prevMonthSpend*100;
+  trendNote=` Proyeksi akhir bulan ${momDiffPct>=0?'naik':'turun'} ${Math.abs(momDiffPct).toFixed(0)}% dibanding bulan lalu.`
+ }
+ const mtdCashNet=actualIncomeMTD-totalSpent,projectedCycleNet=effectiveIncome-projectedMonthlySpend,
+  sign=n=>n>=0?'+':'-';
+ const netCardHeadline=`Arus kas tercatat hingga hari ini ${formatRp(mtdCashNet)}. Proyeksi selisih bersih akhir siklus: ${sign(projectedCycleNet)}${formatRp(Math.abs(Math.round(projectedCycleNet)))}.`;
+ const netNarrative=projectedCycleNet<0
+  ?`Dengan pendapatan efektif siklus ${formatRp(effectiveIncome)} dan proyeksi pengeluaran ${formatRp(projectedMonthlySpend)}, siklus ini berpotensi defisit ${formatRp(Math.abs(Math.round(projectedCycleNet)))}. Kurangi belanja variabel untuk menutup siklus secara impas.`
+  :`Arus kas tercatat hingga hari ini ${formatRp(mtdCashNet)}. Dengan pendapatan efektif siklus ${formatRp(effectiveIncome)} dan proyeksi pengeluaran ${formatRp(projectedMonthlySpend)}, siklus ini diproyeksikan surplus ${formatRp(Math.round(projectedCycleNet))}.`;
+ return{
+  severity,safeDailyLimit,capacityUsedPct,projectedMonthlySpend,
+  pengeluaranTab:{amount:totalSpent,headline:expenseCardHeadline,narrative:`${paretoInsight} ${liquidityAction}${trendNote}`},
+  selisihTab:{amount:mtdCashNet,headline:netCardHeadline,narrative:netNarrative}
+ }
+}
 function monthExpenseConclusion(expense,income){
  if(expense<=0)return income>0?'Belum ada pengeluaran tercatat bulan ini.':'Belum ada pemasukan atau pengeluaran yang diperhitungkan bulan ini.';
  if(income<=0)return `Pengeluaran tercatat ${rp(expense)}; belum ada pemasukan tercatat, jadi rasio belum dapat dihitung.`;
@@ -1183,7 +1252,7 @@ function monthExpenseConclusion(expense,income){
  return gap>0?`Pengeluaran ${ratio}× dari pemasukan tercatat; melebihi pemasukan ${rp(gap)}.`:gap<0?`Pengeluaran ${ratio}× dari pemasukan tercatat; sisa pemasukan ${rp(-gap)}.`:'Pengeluaran sama dengan pemasukan tercatat.';
 }
 function kal(){
- const[y,mo]=cm.split('-').map(Number),off=(new Date(y,mo-1,1).getDay()+6)%7,summary=financialAnalytics(cm+'-01'),E=summary.spend,I=summary.income,n=I-E,net=kt==='net',sd=inD(cd);
+ const[y,mo]=cm.split('-').map(Number),off=(new Date(y,mo-1,1).getDay()+6)%7,currentCycle=cm===today().slice(0,7),summary=financialAnalytics(currentCycle?today():cm+'-'+pad(dim(cm))),E=summary.spend,I=summary.income,n=I-E,net=kt==='net',sd=inD(cd);
  let g='';
  for(let i=0;i<42;i++){const d=new Date(y,mo-1,1-off+i),s=ymd(d),x=inD(s),v=sum(x,'in')-sum(x,'out');
   g+=`<div class='cc${d.getMonth()===mo-1?'':' o'}${d.getDay()===0?' su':''}${s===cd?' sel':''}' data-d='${s}' onclick='pick(this.dataset.d)'><span class='${s===today()?'td':''}'>${d.getDate()}</span>${x.length?`<em class='am ${v<0?'out':'in'}'>${v<0?'−':'+'}${kf(v)}</em>`:''}</div>`}
@@ -1192,8 +1261,8 @@ function kal(){
  <div class='wk'>${['SEN','SEL','RAB','KAM','JUM','SAB','MIN'].map(w=>`<span>${w}</span>`).join('')}</div><div class='cg'>${g}</div></div>
  <div class='card'><div class='row'><div class='cic' style='background:var(--blue);color:#fff'>✨</div><div class='grow'><b>Ringkasan AI</b></div><button class='pill' style='background:var(--blue);color:#fff;border:0' onclick='kg()'>Buat ringkasan</button></div>
  <div class='seg'><b class='${net?'':'on'}' data-k='out' onclick='kt=this.dataset.k;render()'>Pengeluaran</b><b class='${net?'on':''}' data-k='net' onclick='kt=this.dataset.k;render()'>Selisih</b></div>
- <div style='border-radius:13px;padding:11px 12px;background:${net?'rgba(52,199,89,.12)':'rgba(255,59,48,.09)'}'><div class='cap'>${net?'Selisih':'Pengeluaran'}</div><div class='big2 ${net?(n<0?'out':'in'):'out'}'>${rp(net?n:E)}</div><div class='sub'>${net?'Masuk tercatat '+rs(I)+' − pengeluaran '+rs(E):monthExpenseConclusion(E,I)}</div></div>
- ${ksm?`<div class='sub' style='margin-top:10px;color:var(--tx);animation:fade .4s'>✨ ${ksm==='…'?'Menyusun ringkasan…':esc(ksm)}</div>`:''}</div>
+ <div style='border-radius:13px;padding:11px 12px;background:${net?'rgba(52,199,89,.12)':'rgba(255,59,48,.09)'}'><div class='cap'>${net?'Selisih':'Pengeluaran'}</div><div class='big2 ${net?(n<0?'out':'in'):'out'}'>${rp(net?n:E)}</div><div class='sub'>${net?'Masuk tercatat '+rs(I)+' − pengeluaran '+rs(E):currentCycle?`Pengeluaran berjalan ${rp(E)} dari kapasitas pendapatan siklus ${rp(summary.effectiveIncome)}.`:monthExpenseConclusion(E,I)}</div></div>
+ ${ksm?`<div class='ai-summary${ksm==='…'?' loading':''}' data-severity='${ksm==='…'?'neutral':ksm.severity}' style='margin-top:10px'>${ksm==='…'?'Menyusun ringkasan…':(()=>{const insight=ksm[net?'selisihTab':'pengeluaranTab'];return `<b>${esc(insight.headline)}</b><div class='sub' style='margin-top:6px'>${esc(insight.narrative)}</div>`})()}</div>`:''}</div>
  <div class='card'><div class='row sp'><b>${fmtD(cd)}</b><button class='pill' onclick='ka()'>+ Tambah</button></div>${sd.length?sd.sort((p,r)=>r.id-p.id).map(row).join(''):`<p class='sub'>Tidak ada transaksi.</p>`}</div>`}
 let pr='m';
 const NAV=[['home','Beranda','<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>'],['trx','Transaksi','<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/>'],['chat','Catat','<path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/>'],['kal','Kalender','<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'],['rep','Analisis','<path d="M5 20V10M12 20V4M19 20v-7"/>']];
