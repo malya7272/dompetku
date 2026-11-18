@@ -1302,9 +1302,9 @@ function financialAnalytics(date=today()){
   monthOverMonth=activeDays>=15&&prior&&prior.spend>0?(spend+dailyRate*remainingDays+billRemaining+debtToMonthEnd-prior.spend)/prior.spend*100:null,
   forecastSpend=spend+dailyRate*remainingDays+billRemaining+debtToMonthEnd,
   projectedIncome=effectiveIncome,
-  mtdExpenseRatio=effectiveIncome>0?spend/effectiveIncome:null,
-  projectedExpenseRatio=effectiveIncome>0?forecastSpend/effectiveIncome:null,
-  savingsRate=effectiveIncome>0?(effectiveIncome-forecastSpend)/effectiveIncome:null,
+  mtdExpenseRatio=effectiveIncome>0?spend/effectiveIncome:0,
+  projectedExpenseRatio=effectiveIncome>0?forecastSpend/effectiveIncome:0,
+  savingsRate=effectiveIncome>0?(effectiveIncome-forecastSpend)/effectiveIncome:0,
   spendRate=mtdExpenseRatio,
   projectedEnd=b0+upcomingSalary-dailyRate*remainingDays-billRemaining-debtToMonthEnd,
   budget=S.bud||{},budgetTotal=Object.values(budget).reduce((n,x)=>n+(+x||0),0),
@@ -1348,14 +1348,14 @@ function hl(){
  const a=financialAnalytics(),f=fcst(),s=sim(),normal=s.sc.normal,worst=s.sc.worst,
   bp=a.totalBudgetUtilization,
   p1=(normal.end>=a.A.buf?20:normal.end>=0?10:0)+(worst.end>=a.A.buf?20:worst.end>=0?10:0),
-  p2=a.savingsRate===null?15:Math.round(Math.max(0,Math.min(1,a.savingsRate/.2))*30),
+  p2=Math.round(Math.max(0,Math.min(1,a.savingsRate/.2))*30),
   p3=a.trend===null?8:a.trend<=0?15:a.trend<=20?8:0,
   p4=bp===null?8:bp<=80?15:bp<=100?8:0,
   sc=p1+p2+p3+p4,
   lb=normal.end<0?['Waspada likuiditas','#FF9F0A','255,159,10']:sc>=70?['Sehat','var(--green)','52,199,89']:sc>=45?['Perlu perhatian','#FF9F0A','255,159,10']:['Risiko tinggi','var(--red)','255,59,48'];
  return{sc,lb,sr:a.savingsRate,spendRate:a.spendRate,f,s,bp,parts:[
   ['Likuiditas sampai gajian',p1,40,s.days?`Normal: sisa ${rp(normal.end)} · Terburuk: sisa ${rp(worst.end)}`:'Hari ini gajian'],
-  ['Rasio tabungan proyeksi',p2,30,a.savingsRate===null?'Belum ada pemasukan':`Tabungan ${pctFmt(a.savingsRate*100)} · pengeluaran MTD ${pctFmt(a.mtdExpenseRatio===null?NaN:a.mtdExpenseRatio*100)} · proyeksi pengeluaran ${pctFmt(a.projectedExpenseRatio===null?NaN:a.projectedExpenseRatio*100)}`],
+  ['Rasio tabungan proyeksi',p2,30,a.projectedIncome===0?'Belum ada pemasukan':`Tabungan ${pctFmt(a.savingsRate*100)} · pengeluaran MTD ${pctFmt(a.mtdExpenseRatio*100)} · proyeksi pengeluaran ${pctFmt(a.projectedExpenseRatio*100)}`],
   ['Tren biaya variabel',p3,15,a.trend===null?'Data pembanding belum cukup':`${a.trend>0?'+':''}${pctFmt(a.trend)} vs rata-rata harian`],
   ['Cakupan anggaran',p4,15,bp===null?'Belum diatur':`Total belanja ${pctFmt(bp)} dari plafon · cakupan ${pctFmt(a.budgetCoverage||0)}`]
  ],analytics:a};
@@ -1373,8 +1373,8 @@ function fc(){
  <svg viewBox='0 0 ${W} ${H}' width='100%'><polyline points='${act}' fill='none' stroke='var(--blue)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/><polyline points='${pr}' fill='none' stroke='var(--blue)' stroke-width='2.5' stroke-dasharray='5 5' opacity='.5'/></svg>
  <div class='row sp'><small>Aktual</small><small>Proyeksi</small></div></div>
  <div class='g2'><div class='card sm'><div class='cap'>Biaya variabel per hari</div><b>${rp(a.dailyRate)}</b></div><div class='card sm'><div class='cap'>Biaya esensial per hari</div><b>${rp(a.essentialRate)}</b></div>
- <div class='card sm'><div class='cap'>Rasio pengeluaran MTD</div><b>${pctFmt(a.mtdExpenseRatio===null?NaN:a.mtdExpenseRatio*100)}</b></div><div class='card sm'><div class='cap'>Rasio pengeluaran proyeksi</div><b>${pctFmt(a.projectedExpenseRatio===null?NaN:a.projectedExpenseRatio*100)}</b></div>
- <div class='card sm'><div class='cap'>Rasio tabungan proyeksi</div><b>${pctFmt(a.savingsRate===null?NaN:a.savingsRate*100)}</b></div>
+ <div class='card sm'><div class='cap'>Rasio pengeluaran MTD</div><b>${pctFmt(a.mtdExpenseRatio*100)}</b></div><div class='card sm'><div class='cap'>Rasio pengeluaran proyeksi</div><b>${pctFmt(a.projectedExpenseRatio*100)}</b></div>
+ <div class='card sm'><div class='cap'>Rasio tabungan proyeksi</div><b>${pctFmt(a.savingsRate*100)}</b></div>
  <div class='card sm'><div class='cap'>Saldo akhir bulan · normal</div><b class='${a.projectedEnd<0?'out':'in'}'>${rp(a.projectedEnd)}</b></div><div class='card sm'><div class='cap'>Saldo sebelum gajian · normal</div><b class='${a.scenarios.normal.end<0?'out':'in'}'>${rp(a.scenarios.normal.end)}</b></div></div>
  <div class='card'>${benchmark}${a.trend===null?'':` Tren biaya variabel harian ${a.trend>0?'+':''}${pctFmt(a.trend)} dari baseline.`}</div>
  ${budgetInfo}`;
