@@ -1703,31 +1703,37 @@ function gReg(){
 function gAuthError(e){
  gBusy=false;
  const c=e&&e.code||'';
- gmsg=c==='auth/unauthorized-domain'?'Domain aplikasi belum diizinkan di Firebase Authentication.'
+ gmsg=c==='auth/unauthorized-domain'?`Domain ${location.hostname} belum diizinkan. Tambahkan domain ini di Firebase Console → Authentication → Settings → Authorized domains.`
   :c==='auth/operation-not-allowed'?'Provider Google belum diaktifkan di Firebase Authentication.'
   :c==='auth/network-request-failed'?'Koneksi Firebase gagal. Periksa internet lalu coba lagi.'
   :c==='auth/invalid-api-key'?'Firebase API key tidak valid.'
   :c==='auth/popup-blocked'?'Popup login diblokir browser. Izinkan popup untuk situs ini lalu coba lagi.'
   :c==='auth/popup-closed-by-user'?'Jendela Google ditutup sebelum login selesai.'
   :c==='auth/cancelled-popup-request'?'Permintaan login sebelumnya dibatalkan. Coba lagi.'
+  :c==='auth/account-exists-with-different-credential'?'Email ini sudah terdaftar dengan metode login lain. Masuk dengan metode tersebut terlebih dahulu.'
+  :c==='auth/invalid-credential'?'Kredensial Google tidak valid atau kedaluwarsa. Coba masuk kembali.'
+  :c==='auth/operation-not-supported-in-this-environment'?'Browser ini tidak mendukung popup login. Coba gunakan browser utama perangkat.'
   :`Gagal masuk dengan Google${c?' ('+c+')':''}. Coba lagi atau periksa pengaturan Firebase.`;
 }
-function gLogin(){
+async function gLogin(){
  if(!(S.fb||FB_DEFAULT)){gmsg='Login Google belum aktif.';if(tab==='prf')render();else gateRender();return}
  if(gBusy)return;
- if(!authReady||!fa){gBusy=true;gmsg='Menyiapkan login Google…';if(tab==='prf')render();else gateRender();fbInit().catch(()=>{});return}
  gBusy=true;gmsg='Membuka Google…';
- const provider=new firebase.auth.GoogleAuthProvider();
- if(matchMedia('(max-width:599px)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
-  if(tab==='prf')render();else gateRender();
-  fa.signInWithRedirect(provider).catch(e=>{gAuthError(e);if(tab==='prf')render();else gateRender()});
-  return
- }
- let attempt;
- try{attempt=fa.signInWithPopup(provider)}
- catch(e){gAuthError(e);if(tab==='prf')render();else gateRender();return}
  if(tab==='prf')render();else gateRender();
- attempt.then(()=>{gBusy=false;gmsg=''}).catch(e=>{gAuthError(e);if(tab==='prf')render();else gateRender()})
+ try{
+  if(!authReady||!fa)await fbInit();
+  if(!fa)throw new Error('Firebase Authentication belum siap.');
+  const provider=new firebase.auth.GoogleAuthProvider();
+  try{await fa.signInWithPopup(provider)}
+  catch(e){
+   if(!['auth/popup-blocked','auth/operation-not-supported-in-this-environment'].includes(e&&e.code))throw e;
+   await fa.signInWithRedirect(provider)
+  }
+  gBusy=false;gmsg=''
+ }catch(e){
+  gAuthError(e);
+  if(tab==='prf')render();else gateRender()
+ }
 }
 function gFb(){fbSave();setTimeout(gateRender,80)}
 function onAuth(u){
