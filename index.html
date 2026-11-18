@@ -236,7 +236,14 @@ html[data-tab=chat][data-theme=dark] body::before{background:none}
 .pct.neutral{color:var(--ct)}
 h1{display:flex;align-items:center;gap:12px}
 .bkb{width:34px;height:34px;border-radius:50%;border:1px solid var(--gbd);background:var(--card);color:var(--tx);font-size:22px;line-height:1;padding:0 0 2px;display:inline-grid;place-items:center;flex:none;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.tab-back{width:36px;height:36px;border-color:var(--line);color:var(--tx);cursor:pointer}
+.tab-back svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#v>.shd.tab-heading{display:flex;align-items:center;gap:10px;min-width:0}
+#v>.shd.tab-heading h1{display:flex;align-items:center;gap:10px;min-width:0;margin:0}
+.desktop-greeting>.tab-back{margin-bottom:8px}
 .gt .bkb{margin-bottom:10px}
+#v>.shd.tab-heading.gt{display:flex;align-items:center;gap:10px}
+#v>.shd.tab-heading.gt>.tab-back{margin:0}
 #gate{position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;display:none;overflow:auto;background:var(--bg)}
 #gate::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bgimg);pointer-events:none}
 #gate.on{display:block;animation:fade .35s ease both}
@@ -705,16 +712,57 @@ main,#v{width:100%;min-width:0}
 }
 html[data-theme=amber]{
  color-scheme:light;
- --bg:#FFFBF5;--card:#FFF;--tx:#29251F;--sub:#81776B;--line:#EFE3D0;
- --blue:#D97706;--ct:#A65300;--green:#2F855A;--red:#C2413B;--fill:rgba(217,119,6,.10);
- --bar:rgba(255,251,245,.92);--gb:rgba(255,255,255,.72);--gbd:rgba(120,72,18,.14);
- --gi:rgba(217,119,6,.13);--thumb:#FFF;--sh:0 6px 24px rgba(111,68,17,.10);
- --h1:#F59E0B;--h2:#B45309;--cb1:#F59E0B;--cb2:#B45309;--ci:#fff;
- --cs:rgba(180,83,9,.24);
- --bgimg:linear-gradient(180deg,rgba(251,191,36,.18),transparent 42%),radial-gradient(700px 520px at 100% 20%,rgba(255,237,204,.72),transparent 62%);
+ --bg-canvas:#FBF9F5;--bg-surface:#FFFFFF;--bg-subtle:#F5F1E8;--bg-highlight:#FEF4D6;
+ --border-color:#262420;--text-primary:#141413;--text-secondary:#57534E;
+ --accent-primary:#F7B917;--accent-primary-text:#141413;--accent-secondary:#18181B;
+ --bg:var(--bg-canvas);--card:var(--bg-surface);--tx:var(--text-primary);--sub:var(--text-secondary);
+ --line:var(--border-color);--blue:var(--accent-primary);--ct:var(--accent-secondary);
+ --green:#287348;--red:#B42318;--chart-accent:#8A4B00;
+ --fill:var(--bg-subtle);--bar:var(--bg-canvas);--gb:var(--bg-highlight);--gbd:var(--border-color);
+ --gi:var(--bg-highlight);--thumb:var(--bg-surface);--h1:var(--accent-primary);--h2:var(--accent-primary);
+ --cb1:var(--accent-primary);--cb2:var(--accent-primary);--ci:var(--accent-primary-text);
+ --cs:var(--bg-highlight);--bgimg:none;
+ --hct:#FFFFFF;--hsub:#FFFFFFD9;--hbt:#00000024;--hbar:#FFFFFF;
 }
 html[data-theme=amber] body{background:var(--bg);color:var(--tx)}
-html[data-theme=amber] .card:not(.hero),html[data-theme=amber] .gc{border-color:var(--gbd)}
+html[data-theme=amber] .card:not(.hero),html[data-theme=amber] .gc{background-color:var(--bg-surface);border-color:var(--border-color)}
+html[data-theme=amber] #v:not(.desktop-home) .card:not(.hero){border-color:var(--border-color)}
+html[data-theme=amber] .fld,html[data-theme=amber] #cmp input,
+html[data-theme=amber] .chip:not(.on),html[data-theme=amber] .hb{background-color:var(--bg-subtle);color:var(--text-primary)}
+html[data-theme=amber] .sub,html[data-theme=amber] small,
+html[data-theme=amber] .cap,html[data-theme=amber] .db-tx-date,
+html[data-theme=amber] .db-income-note{color:var(--text-secondary)}
+html[data-theme=amber] .li,html[data-theme=amber] .db-transaction{border-color:var(--border-color)}
+html[data-theme=amber] .btn,html[data-theme=amber] .chip.on,
+html[data-theme=amber] .fab,html[data-theme=amber] .pill{background-color:var(--accent-primary);color:var(--accent-primary-text)}
+html[data-theme=amber] .tab.on,html[data-theme=amber] [style*="color:var(--blue)"]{color:var(--accent-secondary)}
+html[data-theme=amber] .cc.sel{border-color:var(--accent-primary);background-color:var(--bg-highlight)}
+html[data-theme=amber] .cc.su{background-color:var(--bg-highlight)}
+html[data-theme=amber] .st.wn{background-color:var(--bg-highlight);color:var(--accent-secondary)}
+html[data-theme=amber] .tab.on{color:var(--accent-secondary)}
+html[data-theme=amber] .seg b.on{background-color:var(--accent-primary);color:var(--accent-primary-text)}
+html[data-theme=amber] .btn,
+html[data-theme=amber] .fab,
+html[data-theme=amber] #cmp button,
+html[data-theme=amber] #tb .tab.ctr,
+html[data-theme=amber] .b.u,
+html[data-theme=amber] .chip.on{color:var(--accent-primary-text)}
+html[data-theme=amber] .nv,
+html[data-theme=amber] .cic{color:var(--chart-accent)}
+html[data-theme=amber] .pb i,
+html[data-theme=amber] .bars i,
+html[data-theme=amber] .dots i.on,
+html[data-theme=amber] .ln.g,
+html[data-theme=amber] .ln.r,
+html[data-theme=amber] .dt.g,
+html[data-theme=amber] .dt.r{stroke:var(--chart-accent)}
+html[data-theme=amber] .pb i,
+html[data-theme=amber] .bars i,
+html[data-theme=amber] .dots i.on{background-color:var(--chart-accent)}
+html[data-theme=amber] .ln.r,
+html[data-theme=amber] .dt.r{stroke:var(--red)}
+html[data-theme=amber] .cc>span.td{background-color:var(--accent-primary);color:var(--accent-primary-text)}
+html[data-theme=amber] #v svg polyline[stroke="var(--blue)"]{stroke:var(--chart-accent)}
 html[data-theme=amber] .desktop-topbar .desktop-wordmark b{color:var(--tx)}
 html[data-theme=amber] .desktop-topbar .desktop-wordmark span,
 html[data-theme=amber] .desktop-search{color:var(--sub)}
@@ -727,35 +775,123 @@ html[data-theme=amber] .desktop-home .db-empty{background:var(--card);border-col
 html[data-theme=amber] .desktop-home .db-card-title,
 html[data-theme=amber] .desktop-home .db-tx-name{color:var(--tx)}
 html[data-theme=amber] .desktop-home .db-wallet{background:linear-gradient(135deg,var(--h1),var(--h2))}
+html[data-theme=amber] .desktop-rail{background-color:var(--accent-secondary);color:var(--bg-surface)}
+html[data-theme=amber] .desktop-nav-btn.active{background-color:var(--accent-primary);color:var(--accent-primary-text)}
+html[data-theme=amber] .desktop-nav-btn:hover,
+html[data-theme=amber] .desktop-rail-bottom button:hover{background-color:var(--bg-highlight);color:var(--accent-secondary)}
+html[data-theme=amber] .desktop-greeting h1 span,
+html[data-theme=amber] .desktop-notice i{color:var(--accent-secondary);background-color:var(--accent-primary)}
+html[data-theme=amber] .desktop-quick{background-color:var(--bg-surface);border-color:var(--border-color)}
+html[data-theme=amber] .desktop-quick-item{color:var(--text-primary)}
+html[data-theme=amber] .desktop-quick-item:hover,
+html[data-theme=amber] .desktop-quick-item i{background-color:var(--bg-subtle)}
+html[data-theme=amber] .db-card-title,
+html[data-theme=amber] .db-tx-name{color:var(--text-primary)}
+html[data-theme=amber] .db-balance-main span,
+html[data-theme=amber] .db-trend,
+html[data-theme=amber] .db-month small,
+html[data-theme=amber] .db-legend span,
+html[data-theme=amber] .db-income-note{color:var(--text-secondary)}
+html[data-theme=amber] .db-month i,
+html[data-theme=amber] .db-gauge .track,
+html[data-theme=amber] .db-income-bar{background-color:var(--bg-subtle);stroke:var(--bg-subtle)}
+html[data-theme=amber] .db-wallet{background-image:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary))}
+html[data-theme=amber] .desktop-home .db-wallet{color:#FFFFFF}
+html[data-theme=amber] .db-wallet-label,
+html[data-theme=amber] .db-wallet-number,
+html[data-theme=amber] .db-wallet-meta,
+html[data-theme=amber] .db-wallet-bottom small{color:#FFFFFF}
+html[data-theme=amber] .db-wallet-status{background-color:#FFFFFF2A;color:#FFFFFF}
+html[data-theme=amber] .db-action button{background-color:var(--accent-primary);color:var(--accent-primary-text)}
+html[data-theme=amber] .db-head-more,
+html[data-theme=amber] .db-tx-more,
+html[data-theme=amber] .db-health-more{color:var(--text-secondary)}
+html[data-theme=amber] .db-transaction{border-color:var(--border-color)}
+html[data-theme=amber] .db-tx-icon,
+html[data-theme=amber] .db-income-bar{background-color:var(--bg-subtle)}
 html[data-theme=amber] .desktop-home .db-trend svg path,
 html[data-theme=amber] .desktop-home .db-gauge .value{stroke:var(--blue)}
 html[data-theme=amber] .desktop-home .db-month.current i,
 html[data-theme=amber] .desktop-home .db-legend span:first-child i,
 html[data-theme=amber] .desktop-home .db-income-bar i{background:var(--blue)}
 html[data-theme=amber] .desktop-home .db-gauge .value{fill:none}
-html[data-theme=amber] .desktop-home .db-transaction{border-color:var(--line)}
-html[data-theme=amber] .desktop-home .db-tx-icon,
-html[data-theme=amber] .desktop-home .db-income-bar{background:var(--fill)}
 html[data-theme=amber] body::before{background:var(--bgimg)}
-html[data-theme=amber][data-tab=chat] body::before{background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,237,204,.15) 35%,rgba(245,158,11,.16))}
 html[data-theme=amber] body::after{background:color-mix(in srgb,var(--bg) 94%,transparent)}
+html[data-theme=amber] .card.hero .in,
+html[data-theme=amber] .card.hero .out,
+html[data-theme=amber] .card.hero .sub,
+html[data-theme=amber] .card.hero .cap,
+html[data-theme=amber] .card.hero small,
+html[data-theme=amber] .card.hero .eye{color:#FFFFFF}
+html[data-theme=amber] .card.hero .tx{fill:#FFFFFF}
+.shd.tab-heading{
+ width:100%;max-width:1000px;grid-row:auto!important;
+ margin:0 auto 6px!important;padding:8px 0!important;
+ background:transparent!important;border:0;border-radius:0;box-shadow:none
+}
+#v>h1.shd.tab-heading{display:flex;align-items:center;gap:10px}
+#v>.shd.tab-heading h1{margin:0}
 @media (max-width:899px){
- #v>.shd{width:100vw;margin-left:calc(50% - 50vw)!important;margin-right:calc(50% - 50vw)!important;padding-left:clamp(12px,4vw,32px)!important;padding-right:clamp(12px,4vw,32px)!important}
+ #v>.shd.tab-heading{margin-left:0!important;margin-right:0!important;padding:8px 0!important}
 }
 @media (max-width:380px){
- #v>.shd{padding-left:12px!important;padding-right:12px!important}
+ #v>.shd.tab-heading{margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important}
 }
-@media (min-width:381px) and (max-width:599px){
- #v>.shd{padding-left:clamp(12px,4vw,18px)!important;padding-right:clamp(12px,4vw,18px)!important}
+html[data-theme=amber] .card.hero{
+ background:linear-gradient(135deg,#9A5B00,#633900);color:#FFFFFF
 }
-@media (min-width:600px) and (max-width:899px){
- #v>.shd{padding-left:clamp(16px,4vw,32px)!important;padding-right:clamp(16px,4vw,32px)!important}
+html[data-theme=amber] .card.hero .hov rect{fill:#FFFFFF;opacity:.38}
+html[data-theme=amber] .card.hero .hov rect[opacity="0.07"]{opacity:.18!important}
+html[data-theme=amber] .card.hero .hov rect[opacity="0.22"]{opacity:.62!important}
+html[data-theme=amber] .card.hero .hov rect[opacity="0.6"]{opacity:.85!important}
+html[data-theme=amber] .desktop-home .db-wallet{
+ background:linear-gradient(135deg,#9A5B00,#633900);color:#FFFFFF
 }
-@media (min-width:900px){
- #v>.shd{background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html[data-theme=amber] .db-wallet-status{background-color:#FFFFFF2A;color:#FFFFFF}
+html[data-theme=amber] .desktop-home .db-trend svg path,
+html[data-theme=amber] .desktop-home .db-gauge .value{stroke:var(--chart-accent)}
+html[data-theme=amber] .desktop-home .db-month.current i,
+html[data-theme=amber] .desktop-home .db-legend span:first-child i,
+html[data-theme=amber] .desktop-home .db-income-bar i{background-color:var(--chart-accent)}
+html[data-theme=amber] .desktop-home .db-trend b{color:#287348}
+html[data-theme=amber] .desktop-home .db-legend span:nth-child(2) i{background-color:#8A5E00}
+html[data-theme=amber] .desktop-home .db-legend span:nth-child(3) i{background-color:#57534E}
+html[data-theme=amber] .desktop-home .db-income-bar{background-color:#F5F1E8}
+html[data-theme=amber] .desktop-home .db-gauge .track{stroke:#F5F1E8}
+@media (min-width:1024px){
+ #v>.desktop-home .desktop-greeting h1{display:flex;align-items:center;gap:10px}
+ #v>.desktop-home .desktop-greeting .tab-back{margin:0}
 }
-.theme-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
-.theme-options b{padding:8px 2px;font-size:12px}
+#v>.chat-sticky.shd{
+ position:sticky;top:0;z-index:8;margin:0 0 8px!important;padding:8px 0 10px!important;
+ background:var(--bg);background:color-mix(in srgb,var(--bg) 97%,transparent);
+ -webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4)
+}
+.chat-sticky-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.chat-sticky-head .bkb{margin:0}
+.chat-sticky-head .gh{font-size:clamp(18px,4.5vw,24px);line-height:1.2}
+.chat-carousel{min-width:0}
+.chat-carousel-viewport{overflow:hidden;touch-action:pan-y;border-radius:20px}
+.chat-carousel-track{display:flex;transition:transform .35s ease;will-change:transform}
+.chat-slide{flex:0 0 100%;min-width:0;padding:0 1px}
+.chat-slide .gc{height:174px;min-height:174px;margin:0;padding:16px;border:1px solid var(--line);background:var(--card);cursor:default}
+.chat-slide .gc:active{transform:none}
+.chat-slide-copy{font-size:15px;line-height:1.45}
+.chat-slide-copy b{color:var(--ct)}
+.chat-slide-detail{align-self:flex-start;border:0;cursor:pointer}
+.chat-carousel-controls{display:flex;align-items:center;justify-content:center;gap:12px;padding-top:7px}
+.chat-carousel-arrow{width:28px;height:28px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--tx);font-size:18px;line-height:1;cursor:pointer}
+.chat-carousel-dots{display:flex;align-items:center;gap:7px}
+.chat-carousel-dot{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:var(--sub);opacity:.35;cursor:pointer}
+.chat-carousel-dot.on{width:18px;border-radius:9px;background:var(--ct);opacity:1}
+.chat-sticky .cap{margin:6px 4px 2px!important}
+html[data-theme=amber] .chat-sticky{background:color-mix(in srgb,var(--bg) 97%,transparent)}
+html[data-theme=amber] .chat-slide .gc{border-color:var(--line)}
+@media (prefers-reduced-motion:reduce){.chat-carousel-track{transition:none}}
+@media (max-width:899px){
+ #v>.chat-sticky.shd{margin:0 0 8px!important;padding: max(8px,env(safe-area-inset-top,0px)) 0 10px!important}
+ .chat-slide .gc{height:156px;min-height:156px;padding:14px}
+}
 </style>
 </head>
 <body>
@@ -945,7 +1081,7 @@ function render(a,b){
  desktopSync();
  hdr();
  if(a)$('#tb').innerHTML=NAV.map(([k,l,p])=>`<div class="tab ${k===tab?'on':''}${k==='chat'?' ctr':''}" aria-label="${l}" title="${l}" onclick="go('${k}')"><svg viewBox="0 0 24 24">${p}</svg>${k==='chat'?'':`<span>${l}</span>`}</div>`).join('');
- $('#cmp').style.display=tab==='chat'?'flex':'none';if(a){cnt();glass()}seg();slc();emph();mas();dmb();
+ $('#cmp').style.display=tab==='chat'?'flex':'none';if(a){cnt();glass()}seg();slc();emph();mas();dmb();chatCarouselInit();
 }
 let desktopViewport=matchMedia('(min-width:1024px)').matches;
 addEventListener('resize',()=>{const next=matchMedia('(min-width:1024px)').matches;if(next!==desktopViewport){desktopViewport=next;render(1);window.scrollTo(0,0)}});
@@ -978,21 +1114,21 @@ let q='';
 const fm=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 const dk=()=>{const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches};
 function setTh(v,ev){
- const R=document.documentElement,ap=()=>{if(v==='auto')delete R.dataset.theme;else R.dataset.theme=v;S.th=v;save();themeColor();if(tab==='set')render()};
+ const R=document.documentElement,ap=()=>{if(v==='auto')delete R.dataset.theme;else R.setAttribute('data-theme',v);if(v==='amber')R.classList.remove('dark');S.th=v;save();themeColor();if(tab==='set')render()};
  if(!document.startViewTransition||matchMedia('(prefers-reduced-motion:reduce)').matches){R.classList.add('tt');ap();setTimeout(()=>R.classList.remove('tt'),500);return}
  const x=ev&&ev.clientX||innerWidth-36,y=ev&&ev.clientY||36,r=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
  document.startViewTransition(ap).ready.then(()=>R.animate({clipPath:['circle(0px at '+x+'px '+y+'px)','circle('+r+'px at '+x+'px '+y+'px)']},{duration:650,easing:'cubic-bezier(.4,0,.2,1)',pseudoElement:'::view-transition-new(root)'})).catch(()=>{});
 }
-function themeColor(){const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#F4F5FA'}
+function themeColor(){const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.documentElement.dataset.theme==='amber'?'#FBF9F5':getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#F4F5FA'}
 const bw=()=>{let w='';const mo=inM(today().slice(0,7));for(const k in S.bud||{}){const s=sum(mo.filter(x=>x.c===k),'out');if(S.bud[k]&&s>S.bud[k])w+='\n⚠️ Anggaran '+k+' terlampaui '+rp(s-S.bud[k])}return w};
 function cnt(){document.querySelectorAll('[data-n]').forEach(e=>{const to=+e.dataset.n,t0=performance.now();(function f(t){const p=Math.min((t-t0)/800,1);e.textContent=rp(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)})}
 const edit=id=>{const x=S.tx.find(y=>y.id===id);if(x)openSheet({id,t:x.t,c:x.c,a:fm(x.a),n:x.n,d:x.d,w:x.w})};
-function set(){const th=S.th||'auto',cap=`<div class='cap' style='margin:18px 6px 6px'>`;return `<h1>${bb()}Atur</h1>${cap}Tampilan</div><div class='seg theme-options'>${[['auto','Otomatis'],['light','Terang'],['dark','Gelap'],['amber','Amber']].map(([k,l])=>`<b class='${th===k?'on':''}' data-k='${k}' onclick='setTh(this.dataset.k,event)'>${l}</b>`).join('')}</div>${cap}Anggaran bulanan</div><div class='card'>${Object.keys(CAT.out).map(k=>`<div class='li row'><div class='ic'>${EM[k]}</div><span class='grow'>${k}</span><input class='fld bi' data-k='${k}' inputmode='numeric' placeholder='Rp 0' value='${S.bud&&S.bud[k]?fm(S.bud[k]):''}' oninput='bud(this.dataset.k,this)'></div>`).join('')}</div>${cap}Target tabungan</div><div class='card'><div class='li row'><div class='ic'>🎯</div><span class='grow'>Target</span><input class='fld bi' inputmode='numeric' placeholder='Rp 0' value='${S.tg?fm(S.tg):''}' oninput='stg(this)'></div></div>${cap}Sinkronisasi</div>${cl()}${cap}Backup ke Spreadsheet</div>${gsUI()}${cap}Salin &amp; pulihkan</div><div class='card'><textarea id='bk' class='fld' rows='3' placeholder='Tempel cadangan di sini'></textarea><div class='g2'><button class='btn' onclick='bkc()'>Salin</button><button class='btn' style='background:var(--fill);color:var(--blue)' onclick='bkr()'>Pulihkan</button></div><button class='btn' style='background:var(--fill);color:var(--red)' onclick='rst(this)'>Hapus semua data</button></div>`}
+function set(){const th=S.th||'auto',cap=`<div class='cap' style='margin:18px 6px 6px'>`;return `<h1>${bb()}Atur</h1>${cap}Tampilan</div><div class='seg'>${[['auto','Otomatis'],['light','Terang'],['dark','Gelap'],['amber','Amber']].map(([k,l])=>`<b class='${th===k?'on':''}' data-k='${k}' onclick='setTh(this.dataset.k,event)'>${l}</b>`).join('')}</div>${cap}Anggaran bulanan</div><div class='card'>${Object.keys(CAT.out).map(k=>`<div class='li row'><div class='ic'>${EM[k]}</div><span class='grow'>${k}</span><input class='fld bi' data-k='${k}' inputmode='numeric' placeholder='Rp 0' value='${S.bud&&S.bud[k]?fm(S.bud[k]):''}' oninput='bud(this.dataset.k,this)'></div>`).join('')}</div>${cap}Target tabungan</div><div class='card'><div class='li row'><div class='ic'>🎯</div><span class='grow'>Target</span><input class='fld bi' inputmode='numeric' placeholder='Rp 0' value='${S.tg?fm(S.tg):''}' oninput='stg(this)'></div></div>${cap}Sinkronisasi</div>${cl()}${cap}Backup ke Spreadsheet</div>${gsUI()}${cap}Salin &amp; pulihkan</div><div class='card'><textarea id='bk' class='fld' rows='3' placeholder='Tempel cadangan di sini'></textarea><div class='g2'><button class='btn' onclick='bkc()'>Salin</button><button class='btn' style='background:var(--fill);color:var(--blue)' onclick='bkr()'>Pulihkan</button></div><button class='btn' style='background:var(--fill);color:var(--red)' onclick='rst(this)'>Hapus semua data</button></div>`}
 function bud(k,el){const v=+el.value.replace(/\D/g,'');el.value=v?fm(v):'';(S.bud=S.bud||{})[k]=v;save()}
 function bkc(){const t=$('#bk');t.value=JSON.stringify({...S,fb:undefined,gs:undefined,pf:undefined,ses:undefined});t.select();try{navigator.clipboard.writeText(t.value)}catch(e){}}
 function bkr(){try{const o=JSON.parse($('#bk').value);if(!Array.isArray(o.tx))throw 0;S={...o,fb:S.fb,th:S.th,sy:S.sy,gs:S.gs,pf:S.pf,ses:S.ses};S.chat=S.chat||[];save();tab='home';render(1)}catch(e){$('#bk').value='';$('#bk').placeholder='Format cadangan tidak valid'}}
 function rst(b){if(!b.dataset.s){b.dataset.s=1;b.textContent='Tap lagi untuk konfirmasi';setTimeout(()=>{b.dataset.s='';b.textContent='Hapus semua data'},3000);return}S={tx:[],chat:[],th:S.th,fb:S.fb,sy:S.sy,gs:S.gs,pf:S.pf,ses:S.ses};save();tab='home';render(1)}
-if(S.th&&S.th!=='auto')document.documentElement.dataset.theme=S.th;
+if(S.th&&S.th!=='auto'){document.documentElement.setAttribute('data-theme',S.th);if(S.th==='amber')document.documentElement.classList.remove('dark')}
 themeColor();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',themeColor);
 let cm=today().slice(0,7),cd=today(),kt='out',ksm='';
@@ -1287,13 +1423,42 @@ function ask(l){
  if(/rencana|cicilan|tabungan|target/.test(l)){const P=plan(),x=P.sc.normal;return `Rencana ${rh} bulan (normal): saldo akhir ${rp(x.end)}, sisa bebas ${rp(x.avg)}/bln. Komitmen cicilan ${rp(P.cm)} + tabungan ${rp(P.am)} per bulan${P.dti!==null&&P.cm>0?' (cicilan '+Math.round(P.dti)+'% dari pemasukan)':''}.`}
  return null}
 function gcards(I){
- if(!I)return `<div class='gc gcs'><div class='gt1'>Ketik “makan siang 25rb” di bawah.</div></div>`;
- const{H,s,w,top,dd}=I,neg=w.end<0,go2=(k,a)=>`data-k='${k}' data-a='${a||''}' onclick='if(this.dataset.a)an=this.dataset.a;go(this.dataset.k)'`;
- return `<div class='gc gcs' ${go2('rep','f')}><div class='gt1'>Keuanganmu <b>${H.lb[0]}</b>. ${s.days?(neg?`Terburuk: minus ${rp(-w.end)} sebelum tgl ${s.A.pd}.`:`Terburuk: sisa ${rp(w.end)} saat tgl ${s.A.pd}.`):'Hari ini gajian.'}</div><div class='row sp'><span class='gbig'>${s.days}<em>hari lagi</em></span><span class='gpill'>Detail</span></div></div>
- <div class='g2 gcs'><div class='gc' ${go2('rep','p')}><div class='gt1'>${top?`<b>${top[0]}</b> ${dd===null?'terbesar bulan ini':(dd>0?'naik ':'turun ')+Math.abs(dd)+'% dari bulan lalu'}.`:'Belum ada pengeluaran.'}</div><span class='gpill'>Detail</span></div><div class='gc' ${go2('ang')}><div class='gt1'>Batas aman <b>${rp(s.safe)}/hari</b> sampai tgl ${s.A.pd}.</div><span class='gpill'>Anggaran</span></div></div>`}
+ const slides=I?(()=>{
+  const{H,s,w,top,dd}=I,neg=w.end<0;
+  return[
+   {label:'Kondisi keuangan',text:`Keuanganmu <b>${esc(H.lb[0])}</b>. ${s.days?(neg?`Terburuk: minus ${rp(-w.end)} sebelum tgl ${s.A.pd}.`:`Terburuk: sisa ${rp(w.end)} saat tgl ${s.A.pd}.`):'Hari ini gajian.'}`,extra:`<span class='gbig'>${s.days}<em>hari lagi</em></span>`,action:'Lihat kondisi',run:"an='f';go('rep')"},
+   {label:'Pengeluaran terbesar',text:top?`<b>${esc(top[0])}</b> ${dd===null?'terbesar bulan ini':(dd>0?'naik ':'turun ')+Math.abs(dd)+'% dari bulan lalu'}.`:'Belum ada pengeluaran.',extra:top?`<strong>${rp(top[1])}</strong>`:'',action:'Lihat pola',run:"an='p';go('rep')"},
+   {label:'Batas aman harian',text:`Batas aman <b>${rp(s.safe)}/hari</b> sampai tanggal ${s.A.pd}.`,extra:`<span class='sub'>Sesuaikan anggaran agar tetap aman sampai gajian.</span>`,action:'Atur anggaran',run:"go('ang')"}
+  ]
+ })():[{label:'Mulai mencatat',text:'Catat transaksi agar ringkasan kondisi keuanganmu muncul di sini.',extra:'<span class="sub">Contoh: makan siang 25rb</span>',action:'',run:''}];
+ return `<section class='chat-carousel' id='chat-carousel' role='region' aria-roledescription='carousel' aria-label='Ringkasan keuangan' onpointerdown='chatCarouselPointerDown(event)' onpointerup='chatCarouselPointerUp(event)' onpointercancel='chatCarouselPointerCancel()'><div class='chat-carousel-viewport'><div class='chat-carousel-track'>${slides.map((x,i)=>`<div class='chat-slide' role='group' aria-roledescription='slide' aria-label='${i+1} dari ${slides.length}' aria-hidden='${i!==chatSlideIndex}'><div class='gc'><div><div class='cap'>${x.label}</div><div class='gt1 chat-slide-copy' style='margin-top:5px'>${x.text}</div></div><div class='row sp' style='margin-top:auto'>${x.extra}${x.action?`<button class='gpill chat-slide-detail' onclick="${x.run}">${x.action}</button>`:''}</div></div></div>`).join('')}</div></div>${slides.length>1?`<div class='chat-carousel-controls'><button class='chat-carousel-arrow' onclick='chatCarouselStep(-1,true)' aria-label='Info sebelumnya'>‹</button><div class='chat-carousel-dots'>${slides.map((_,i)=>`<button class='chat-carousel-dot${i===chatSlideIndex?' on':''}' onclick='chatCarouselGo(${i},true)' aria-label='Tampilkan info ${i+1}' aria-current='${i===chatSlideIndex?'true':'false'}'></button>`).join('')}</div><button class='chat-carousel-arrow' onclick='chatCarouselStep(1,true)' aria-label='Info berikutnya'>›</button></div>`:''}</section>`
+}
+let chatSlideIndex=0,chatCarouselTimer=null,chatCarouselPointer=null;
+function chatCarouselGo(i,manual){
+ const c=$('#chat-carousel'),track=c&&c.querySelector('.chat-carousel-track');if(!track)return;
+ const slides=[...track.children],n=slides.length;if(!n)return;
+ chatSlideIndex=(i+n)%n;track.style.transform=`translateX(-${chatSlideIndex*100}%)`;
+ slides.forEach((s,j)=>s.setAttribute('aria-hidden',j===chatSlideIndex?'false':'true'));
+ c.querySelectorAll('.chat-carousel-dot').forEach((d,j)=>{const on=j===chatSlideIndex;d.classList.toggle('on',on);d.setAttribute('aria-current',on?'true':'false')});
+ if(manual)chatCarouselInit()
+}
+function chatCarouselStep(n,manual){chatCarouselGo(chatSlideIndex+n,manual)}
+function chatCarouselPointerDown(e){if(e.pointerType==='mouse'&&e.button!==0)return;chatCarouselPointer={x:e.clientX,y:e.clientY}}
+function chatCarouselPointerUp(e){
+ if(!chatCarouselPointer)return;
+ const dx=e.clientX-chatCarouselPointer.x,dy=e.clientY-chatCarouselPointer.y;chatCarouselPointer=null;
+ if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy))chatCarouselStep(dx<0?1:-1,true)
+}
+function chatCarouselPointerCancel(){chatCarouselPointer=null}
+function chatCarouselInit(){
+ clearInterval(chatCarouselTimer);chatCarouselTimer=null;
+ const c=$('#chat-carousel');if(!c||tab!=='chat'||c.querySelectorAll('.chat-slide').length<2||document.hidden||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+ chatCarouselGo(chatSlideIndex,false);
+ chatCarouselTimer=setInterval(()=>{if(matchMedia('(prefers-reduced-motion:reduce)').matches){clearInterval(chatCarouselTimer);chatCarouselTimer=null;return}if(!document.hidden&&tab==='chat')chatCarouselStep(1,false)},3000)
+}
 function chat(){
  const h=new Date().getHours(),gr=h<11?'pagi':h<15?'siang':h<18?'sore':'malam',m=S.chat.length?S.chat:[{r:'a',t:'Ketik, mis. “makan siang 25rb” atau “gajian 5jt”. Tanya juga: “saldo”, “bulan ini”.'}],f=freq().slice(0,6);
- return `<div class='gt'>${bb()}<div class='gh'>Selamat ${gr},<br>${nm()}! ✌️</div></div>${gcards(ins())}${f.length?`<div class='cap' style='margin:6px 4px 2px'>Sering dicatat</div><div class='chips'>${f.map((x,i)=>`<span class='chip' data-i='${i}' onclick='qa(+this.dataset.i)'>${EM[x.c]||'📦'} ${esc(x.n)} · ${kf(x.a)} <small style='text-transform:none;opacity:.6'>×${x.cnt}</small></span>`).join('')}</div>`:''}<div id='msgs'>${m.slice(-60).map(x=>`<div class='b ${x.r}'>${esc(x.t).replace(/\n/g,'<br>')}</div>`).join('')}</div>`}
+ return `<div class='chat-sticky'><div class='chat-sticky-head'>${bb()}<div class='gh'>Selamat ${gr}, ${nm()}! ✌️</div></div>${gcards(ins())}</div>${f.length?`<div class='cap' style='margin:12px 4px 2px'>Sering dicatat</div><div class='chips'>${f.map((x,i)=>`<span class='chip' data-i='${i}' onclick='qa(+this.dataset.i)'>${EM[x.c]||'📦'} ${esc(x.n)} · ${kf(x.a)} <small style='text-transform:none;opacity:.6'>×${x.cnt}</small></span>`).join('')}`:''}<div id='msgs'>${m.slice(-60).map(x=>`<div class='b ${x.r}'>${esc(x.t).replace(/\n/g,'<br>')}</div>`).join('')}${f.length?`<div class='b a'>💡 Pola kebiasaanmu: ${f.slice(0,3).map(x=>esc(x.n)+' ('+rp(x.a)+')').join(', ')}. Tap pintasan di atas, atau ketik namanya saja tanpa nominal — nominal biasanya terisi otomatis.</div>`:''}</div>`}
 function emph(){
  const v=$('#v');if(!v||!v.ownerDocument||!document.createTreeWalker)return;
  const w=document.createTreeWalker(v,NodeFilter.SHOW_TEXT),L=[];let n;
@@ -1536,7 +1701,37 @@ const MAS='<svg class="mas" viewBox="2 2 66 66" fill="none" stroke="currentColor
 function mas1(){
  document.querySelectorAll('.card.hero,.gp').forEach(h=>{if(!h.querySelector(':scope>.mas'))h.insertAdjacentHTML('beforeend',MAS)});
  document.querySelectorAll('#v[data-t=home] .card[style*="text-align:center"]').forEach(c=>{if(!c.querySelector('.mas'))c.insertAdjacentHTML('afterbegin',MAS.replace('class="mas"','class="mas em"'))})}
-function hdr(){const v=document.getElementById('v'),f=v&&v.firstElementChild;document.querySelectorAll('#v>.shd').forEach(e=>{if(e!==f)e.classList.remove('shd')});if(f){if(f.classList.contains('desktop-home'))f.classList.remove('shd');else f.classList.add('shd')}}
+function hdr(){
+ const v=document.getElementById('v'),f=v&&v.firstElementChild;
+ document.querySelectorAll('#v>.shd').forEach(e=>{if(e!==f)e.classList.remove('shd')});
+ if(!f)return;
+ if(f.classList.contains('desktop-home')){
+  const g=f.querySelector('.desktop-greeting');
+  const heading=g&&g.querySelector('h1');
+  if(heading&&!heading.querySelector('.tab-back'))heading.insertAdjacentHTML('afterbegin',`<button class="bkb tab-back" onclick="bk()" aria-label="Kembali"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>`);
+  f.classList.remove('shd');
+  return
+ }
+ f.classList.add('shd');
+ const heading=f.matches('h1')?f:f.querySelector('h1');
+ let back=f.querySelector('button[aria-label="Kembali"],button.bkb');
+ if(!back)back=document.createElement('button');
+ back.classList.add('bkb','tab-back');
+ back.type='button';
+ back.setAttribute('aria-label','Kembali');
+ back.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
+ back.onclick=bk;
+ if(f.classList.contains('row')||f.classList.contains('gt')){
+  f.classList.add('tab-heading');
+  if(back.parentElement!==f||f.firstElementChild!==back)f.insertBefore(back,f.firstChild)
+ }else if(heading===f){
+  heading.classList.add('tab-heading');
+  if(back.parentElement!==heading)heading.insertBefore(back,heading.firstChild)
+ }else if(heading){
+  heading.classList.add('tab-heading');
+  if(back.parentElement!==heading)heading.insertBefore(back,heading.firstChild)
+ }
+}
 addEventListener('scroll',()=>document.documentElement.classList.toggle('sc',scrollY>6),{passive:true});
 function mini(){
  if(!S.tx.length)return'';
